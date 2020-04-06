@@ -1,0 +1,40 @@
+language: python
+python: 3.6
+cache: pip
+install:
+  - pip install pipenv
+  - pipenv install --dev
+  - wget https://github.com/Sage-Bionetworks/infra-utils/archive/master.zip -O /tmp/infra-utils.zip
+  - unzip -j -n /tmp/infra-utils.zip -x "infra-utils-master/.gitignore" "infra-utils-master/LICENSE" "infra-utils-master/*.md" "infra-utils-master/aws/*"
+  - ./setup_aws_cli.sh || travis_terminate 1
+  - export SAM_CLI_TELEMETRY=0
+stages:
+  - name: validate
+  - name: test
+    if: branch = master AND type = push
+  - name: deploy
+    if: (tag =~ ^v) OR (branch = master AND type = push)
+jobs:
+  fast_finish: true
+  include:
+    - stage: validate
+      script:
+        - pre-commit autoupdate
+        - pre-commit run --all-files
+        - sam build --build-dir build
+        - python -m pytest tests/ -v
+    - stage: test
+      script:
+        - sam build --build-dir build
+        - |
+          sam package --template-file build/template.yaml \
+            --s3-bucket essentials-awss3lambdaartifactsbucket-x29ftznj6pqw \
+            --output-template-file build/set-bucket-tags-macro.yaml
+    - stage: deploy
+      script:
+        - sam build --build-dir build
+        - |
+          sam package --template-file build/template.yaml \
+            --s3-bucket essentials-awss3lambdaartifactsbucket-x29ftznj6pqw \
+            --output-template-file build/set-bucket-tags-macro.yaml
+        - ./deploy-template.sh || travis_terminate 1
