@@ -11,10 +11,7 @@ from set_bucket_tags import app
 
 class TestHandler(unittest.TestCase):
 
-  # happy path
-  def test_adding_tags(self):
-    with open(r'tests/events/event.json') as file:
-      event = json.load(file)
+  def test_happy_path(self):
     s3 = boto3.client('s3')
     with Stubber(s3) as stubber, \
       patch('set_bucket_tags.app.get_bucket_name') as name_mock, \
@@ -34,15 +31,5 @@ class TestHandler(unittest.TestCase):
               'HTTPHeaders': {}
             }})
         app.get_s3_client = MagicMock(return_value=s3)
-        result = app.handler(event, None)
-    self.assertEqual('success', result['status'])
-
-
-  def test_missing_bucket_name(self):
-    with open(r'tests/events/param_missing.json') as file:
-      event = json.load(file)
-    result = app.handler(event, None)
-    self.assertEqual('failure', result['status'])
-    self.assertEqual(
-      app.MISSING_BUCKET_NAME_ERROR_MESSAGE,
-      result['errorMessage'])
+        result = app.create_or_update({},{})
+        self.assertEqual(True, result)

@@ -1,6 +1,6 @@
 # it-lambda-set-bucket-tags
 
-Cloudformation Macro that sets tags for a S3 bucket.
+Cloudformation Custom Resource that sets tags for a S3 bucket.
 
 Inventory of source code and supporting files:
 
@@ -12,29 +12,32 @@ Inventory of source code and supporting files:
 The [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) is used to build and package the lambda code. The [sceptre](https://github.com/Sceptre/sceptre) utility is used to deploy the macro that invokes the lambda as a CloudFormation stack.
 
 ## Use in a Cloudformation Template
-Insert in your Cloudformation template a block similar to this as a sibling
-of the S3 bucket (called in this example `S3Bucket`) :
+Create a custom resource in your cloud formation template. Here's an example:
 ```yaml
-  'Fn::Transform':
-    Name: "SetBucketTags"
-    Parameters:
+  S3BucketTagger:
+    Type: Custom::S3BucketTagger
+    Properties:
+      ServiceToken: !ImportValue
+        'Fn::Sub': '${AWS::Region}-set-bucket-tags-macro-SetBucketTagsFunctionArn'
       BucketName: !Ref S3Bucket
 ```
 
-Cloudformation sends the template and params to the lambda. The lambda parses
-the template and picks out the S3 bucket. It pulls the current tags, derives a
-new tag, then sets the tags again on that bucket. It does not alter the original
-template.
+The creation of the custom resource triggers the lambda, which pulls the current
+tags for `S3Bucket`, derives a new `OwnerEmail` tag, then sets the tags again on
+that bucket.
 
 ## Development
 
 ### Contributions
 Contributions are welcome.
 
-Requirements:
-* Install [pre-commit](https://pre-commit.com/#install) app
-* Clone this repo
-* Run `pre-commit install` to install the git hook.
+### Requirements
+Run `pipenv install --dev` to install both production and development
+requirements, and `pipenv shell` to activate the virtual environment. For more
+information see the [pipenv docs](https://pipenv.pypa.io/en/latest/).
+
+After activating the virtual environment, run `pre-commit install` to install
+the [pre-commit](https://pre-commit.com/) git hook.
 
 ### Create a local build
 
@@ -75,12 +78,10 @@ sam package --template-file build/template.yaml \
 ./deploy-template.sh
 ```
 
-
-
 ## Install Lambda into AWS
 Create the following [sceptre](https://github.com/Sceptre/sceptre) file
 
-config/prod/cfn-sc-actions-provider.yaml
+config/prod/set-bucket-tags-macro.yaml
 ```yaml
 template_path: "remote/set-bucket-tags-macro.yaml"
 stack_name: "set-bucket-tags-macro"
@@ -91,7 +92,7 @@ hooks:
 
 Install the lambda using sceptre:
 ```bash script
-sceptre --var "profile=my-profile" --var "region=us-east-1" launch prod/cfn-sc-actions-provider.yaml
+sceptre --var "profile=my-profile" --var "region=us-east-1" launch prod/set-bucket-tags-macro
 ```
 
 

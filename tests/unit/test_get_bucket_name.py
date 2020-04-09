@@ -7,7 +7,7 @@ class TestGetBucketName(unittest.TestCase):
 
   def test_bucketname_present(self):
     event = {
-      'params': {
+      'ResourceProperties': {
         'BucketName': 'a_bucket_name'
       }
     }
@@ -17,5 +17,5 @@ class TestGetBucketName(unittest.TestCase):
 
   def test_bucketname_missing(self):
     with self.assertRaises(ValueError):
-      event = { 'params': {} }
+      event = { 'ResourceProperties': {} }
       app.get_bucket_name(event)

@@ -1,9 +1,0 @@
-{
-  "fragment": {},
-  "region": "us-east-1",
-  "accountId" : "1234567890",
-  "transformId": "SetBucketTags",
-  "params": {},
-  "requestId": "testRequest",
-  "templateParameterValues": {}
-}

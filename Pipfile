@@ -14,6 +14,7 @@ aws-sam-cli = "*"
 boto3 = "*"
 botocore = "*"
 requests = "*"
+crhelper = "*"
 
 [requires]
 python_version = "3.6"

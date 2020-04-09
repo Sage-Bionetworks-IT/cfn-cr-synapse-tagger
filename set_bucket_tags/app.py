@@ -5,11 +5,16 @@ import traceback
 import boto3
 import requests
 
+from crhelper import CfnResource
+
 
 MISSING_BUCKET_NAME_ERROR_MESSAGE = 'BucketName parameter is required'
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
+
+helper = CfnResource(
+  json_logging=False, log_level='INFO', boto_level='CRITICAL')
 
 
 def get_s3_client():
@@ -18,8 +23,8 @@ def get_s3_client():
 
 def get_bucket_name(event):
   '''Get the bucket name from event params sent to lambda'''
-  parameters = event['params']
-  bucket_name = parameters.get('BucketName')
+  resource_properties = event.get('ResourceProperties')
+  bucket_name = resource_properties.get('BucketName')
   if not bucket_name:
     raise ValueError(MISSING_BUCKET_NAME_ERROR_MESSAGE)
   return bucket_name
@@ -71,35 +76,51 @@ def add_owner_email_tag(tags, synapse_username):
   return tags
 
 
-def handler(event, context):
-  '''
-  Handles a service catalog transform event.
-
-  This uses a value in the current bucket tags to call synapse for the
-  username which is used to create an OwnerEmail tag.
-  '''
+@helper.create
+@helper.update
+def create_or_update(event, context):
+  log.debug('Received event: ' + json.dumps(event, sort_keys=False))
   log.info('Start SetBucketTags Lambda processing')
   log.debug('Received event: ' + json.dumps(event, sort_keys=False))
-  response = {
-    'requestId': event['requestId'],
-    'status': 'success'
-  }
 
+  bucket_name = get_bucket_name(event)
+  tags = get_bucket_tags(bucket_name)
+  principal_arn = get_principal_arn(tags)
+  synapse_username = get_synapse_user_name(principal_arn)
+  tags = add_owner_email_tag(tags, synapse_username)
+  client = get_s3_client()
+  tagging_response = client.put_bucket_tagging(
+    Bucket=bucket_name,
+    Tagging={ 'TagSet': tags }
+    )
+  if tagging_response.get('ResponseMetadata').get('HTTPStatusCode') == 204:
+    return True
+  else:
+    log.debug('Tagging failed')
+    status = 'failure'
+    reason = 'tagging failed'
+    data = tagging_response
+    send_response(event, context, status, reason, data)
+    return False
+
+
+def send_response(event, context, status, reason, data):
+  responseBody = {'Status': status,
+                  'Reason': reason,
+                  'StackId': event['StackId'],
+                  'RequestId': event['RequestId'],
+                  'LogicalResourceId': event['LogicalResourceId'],
+                  'Data': data}
+  logger.debug('RESPONSE BODY:n' + json.dumps(responseBody))
   try:
-    bucket_name = get_bucket_name(event)
-    tags = get_bucket_tags(bucket_name)
-    principal_arn = get_principal_arn(tags)
-    synapse_username = get_synapse_user_name(principal_arn)
-    tags = add_owner_email_tag(tags, synapse_username)
-    client = get_s3_client()
-    client.put_bucket_tagging(
-      Bucket=bucket_name,
-      Tagging={ 'TagSet': tags }
-      )
+    req = requests.put(event['ResponseURL'], data=json.dumps(responseBody))
+    if req.status_code != 200:
+      logger.debug(req.text)
+      raise Exception('Received non-200 response while sending response to CFN.')
+    return
+  except requests.exceptions.RequestException as e:
+    raise
 
-  except Exception as e:
-    traceback.print_exc()
-    response['status'] = 'failure'
-    response['errorMessage'] = str(e)
 
-  return response
+def handler(event, context):
+  helper(event, context)

@@ -31,6 +31,7 @@ Resources:
     Properties:
       CodeUri: set_bucket_tags/
       Handler: app.handler
+      Role: !GetAtt FunctionRole.Arn
       Runtime: python3.6
       Tags:
         Department: !Ref Department
@@ -43,13 +44,34 @@ Resources:
       Name: SetBucketTags
       FunctionName: !GetAtt SetBucketTagsFunction.Arn
 
-  LambdaPermission:
-    Type: AWS::Lambda::Permission
+  FunctionRole:
+    Type: AWS::IAM::Role
     Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref SetBucketTagsFunction
-      Principal: !Ref 'AWS::AccountId'
-      SourceArn: !ImportValue us-east-1-bootstrap-CfServiceRoleArn
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - !Ref BucketTagPolicy
+
+  BucketTagPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: GetAndPutBucketTags
+            Effect: 'Allow'
+            Action:
+              - 's3:GetBucketTagging'
+              - 's3:PutBucketTagging'
+            Resource: '*'
 
 Outputs:
   SetBucketTagsFunctionName:
