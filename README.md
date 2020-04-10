@@ -64,16 +64,16 @@ $ python -m pytest tests/ -v
 ### Build
 
 ```shell script
-sam build --build-dir build
+sam build
 ```
 
 ## Deploy Lambda to S3
 This requires the correct permissions to upload to the bucket in `./deploy-template.sh`.
 
 ```shell script
-sam package --template-file build/template.yaml \
+sam package --template-file .aws-sam/build/template.yaml \
   --s3-bucket essentials-awss3lambdaartifactsbucket-x29ftznj6pqw \
-  --output-template-file build/set-bucket-tags-macro.yaml
+  --output-template-file .aws-sam/build/set-bucket-tags-macro.yaml
 
 ./deploy-template.sh
 ```

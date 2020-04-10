@@ -20,20 +20,20 @@ jobs:
       script:
         - pre-commit autoupdate
         - pre-commit run --all-files
-        - sam build --build-dir build
+        - sam build
         - python -m pytest tests/ -v
     - stage: test
       script:
-        - sam build --build-dir build
+        - sam build
         - |
-          sam package --template-file build/template.yaml \
+          sam package --template-file .aws-sam/build/template.yaml \
             --s3-bucket essentials-awss3lambdaartifactsbucket-x29ftznj6pqw \
-            --output-template-file build/set-bucket-tags-macro.yaml
+            --output-template-file .aws-sam/build/set-bucket-tags-macro.yaml
     - stage: deploy
       script:
-        - sam build --build-dir build
+        - sam build
         - |
-          sam package --template-file build/template.yaml \
+          sam package --template-file .aws-sam/build/template.yaml \
             --s3-bucket essentials-awss3lambdaartifactsbucket-x29ftznj6pqw \
-            --output-template-file build/set-bucket-tags-macro.yaml
+            --output-template-file .aws-sam/build/set-bucket-tags-macro.yaml
         - ./deploy-template.sh || travis_terminate 1
