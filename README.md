@@ -23,8 +23,11 @@ Create a custom resource in your cloud formation template. Here's an example:
 ```
 
 The creation of the custom resource triggers the lambda, which pulls the current
-tags for `S3Bucket`, derives a new `OwnerEmail` tag, then sets the tags again on
-that bucket.
+tags from `S3Bucket`, derives new tags, and sets those on the bucket. Currently
+the only new tag added is an `OwnerEmail` tag, whose value looks like
+`janedoe@synapse.org`, where the `janedoe` is a
+[Synapse](https://www.synapse.org/) user name. Synapse provides email addresses
+for all user names.
 
 ## Development
 
