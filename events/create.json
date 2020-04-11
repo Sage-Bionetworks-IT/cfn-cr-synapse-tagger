@@ -1,0 +1,12 @@
+{
+  "RequestType" : "Create",
+  "RequestId" : "unique_id",
+  "ResponseURL" : "https://cloudformation-custom-resource-response-useast1.s3.amazonaws.com/arn:aws:cloudformation:us-east-1:237179673806:stack/set-bucket-tags-macro/2F6e1d4640-79e7-11ea-afba-0ab7c9206afb",
+  "ResourceType" : "Custom::S3BucketTagger",
+  "LogicalResourceId" : "S3BucketTagger",
+  "StackId" : "arn:aws:cloudformation:us-east-1:237179673806:stack/SC-237179673806-pp-xvgbviyhxerwg/a860e830-73a6-11ea-8ecf-12cf2806950f",
+  "ServiceToken": "arn:aws:lambda:us-east-1:237179673806:function:set-bucket-tags-macro-SetBucketTagsFunction-4PNZHTTFOFA3",
+  "ResourceProperties" : {
+    "BucketName" : "tthyer-s3-synapse-bucket-tagged-04"
+  }
+}

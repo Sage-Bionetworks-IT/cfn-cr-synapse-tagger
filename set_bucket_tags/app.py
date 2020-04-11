@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
 helper = CfnResource(
-  json_logging=False, log_level='INFO', boto_level='CRITICAL')
+  json_logging=False, log_level='DEBUG', boto_level='CRITICAL')
 
 
 def get_s3_client():
@@ -63,7 +63,7 @@ def get_synapse_user_name(principal_arn):
   response = requests.get(synapse_url)
   response.raise_for_status()
   user_profile = response.json()
-  log.debug(f'Synpase user profile response: {user_profile}')
+  log.debug(f'Synapse user profile response: {user_profile}')
   user_name = user_profile.get('userName')
   return user_name
 
@@ -71,8 +71,12 @@ def get_synapse_user_name(principal_arn):
 def add_owner_email_tag(tags, synapse_username):
   '''Add an OwnerEmail tag for the synapse email based on synapse usename'''
   synapse_email = f'{synapse_username}@synapse.org'
-  owner_email_tag = { 'Key': 'OwnerEmail', 'Value': synapse_email}
-  tags.append(owner_email_tag)
+  owner_email_tag = next((tag for tag in tags if tag['Key'] == 'OwnerEmail'), None)
+  if owner_email_tag:
+    owner_email_tag['Value'] = synapse_email
+  else:
+    new_owner_email_tag = { 'Key': 'OwnerEmail', 'Value': synapse_email}
+    tags.append(new_owner_email_tag)
   return tags
 
 
@@ -82,7 +86,6 @@ def create_or_update(event, context):
   log.debug('Received event: ' + json.dumps(event, sort_keys=False))
   log.info('Start SetBucketTags Lambda processing')
   log.debug('Received event: ' + json.dumps(event, sort_keys=False))
-
   bucket_name = get_bucket_name(event)
   tags = get_bucket_tags(bucket_name)
   principal_arn = get_principal_arn(tags)
@@ -93,7 +96,9 @@ def create_or_update(event, context):
     Bucket=bucket_name,
     Tagging={ 'TagSet': tags }
     )
+  log.debug(f'Tagging response: {tagging_response}')
   if tagging_response.get('ResponseMetadata').get('HTTPStatusCode') == 204:
+    log.debug('got 204 response, all is fine')
     return True
   else:
     log.debug('Tagging failed')
@@ -103,6 +108,10 @@ def create_or_update(event, context):
     send_response(event, context, status, reason, data)
     return False
 
+
+@helper.delete
+def delete(event, context):
+  return True
 
 def send_response(event, context, status, reason, data):
   responseBody = {'Status': status,
