@@ -90,7 +90,7 @@ template_path: "remote/set-bucket-tags-macro.yaml"
 stack_name: "set-bucket-tags-macro"
 hooks:
   before_launch:
-    - !cmd "curl https://s3.amazonaws.com/{{stack_group_config.admincentral_cf_bucket}}/it-lambda-set-bucket-tags/master/set-bucket-tags-macro.yaml --create-dirs -o templates/remote/set-bucket-tags-macro.yaml"
+    - !cmd "curl https://s3.amazonaws.com/essentials-awss3lambdaartifactsbucket-x29ftznj6pqw/it-lambda-set-bucket-tags/master/set-bucket-tags-macro.yaml --create-dirs -o templates/remote/set-bucket-tags-macro.yaml"
 ```
 
 Install the lambda using sceptre:
