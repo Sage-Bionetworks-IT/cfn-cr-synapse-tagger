@@ -31,6 +31,8 @@ jobs:
             --s3-bucket essentials-awss3lambdaartifactsbucket-x29ftznj6pqw \
             --output-template-file .aws-sam/build/set-bucket-tags-macro.yaml
     - stage: deploy
+      env:
+        - REPO_NAME="${PWD##*/}"
       script:
         - sam build
         - |
