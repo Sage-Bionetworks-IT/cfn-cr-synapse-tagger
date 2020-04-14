@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Macro to sets tags on a S3 bucket
+Description: Custom Resource to sets tags on a S3 bucket
 
 Globals:
   Function:
@@ -14,12 +14,6 @@ Resources:
       Handler: app.handler
       Role: !GetAtt FunctionRole.Arn
       Runtime: python3.6
-
-  SetBucketTagsMacro:
-    Type: AWS::CloudFormation::Macro
-    Properties:
-      Name: SetBucketTags
-      FunctionName: !GetAtt SetBucketTagsFunction.Arn
 
   FunctionRole:
     Type: AWS::IAM::Role
