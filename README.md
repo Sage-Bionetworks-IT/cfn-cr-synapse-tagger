@@ -51,7 +51,7 @@ $ sam build --use-container
 ### Run locally
 
 ```bash
-$ sam local invoke SetBucketTagsFunction --event events/event.json
+$ sam local invoke SetBucketTagsFunction --event events/create.json
 ```
 
 ### Run unit tests

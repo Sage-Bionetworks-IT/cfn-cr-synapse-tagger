@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
 helper = CfnResource(
-  json_logging=False, log_level='DEBUG', boto_level='CRITICAL')
+  json_logging=False, log_level='DEBUG', boto_level='DEBUG')
 
 
 def get_s3_client():
@@ -106,37 +106,16 @@ def create_or_update(event, context):
     )
   log.debug(f'Tagging response: {tagging_response}')
   if tagging_response.get('ResponseMetadata').get('HTTPStatusCode') == 204:
-    log.debug('got 204 response, all is fine')
+    log.debug('Got 204 response, all is well')
     return True
   else:
     log.debug('Tagging failed')
-    status = 'failure'
-    reason = 'tagging failed'
-    data = tagging_response
-    send_response(event, context, status, reason, data)
     return False
 
 
 @helper.delete
 def delete(event, context):
-  return True
-
-def send_response(event, context, status, reason, data):
-  responseBody = {'Status': status,
-                  'Reason': reason,
-                  'StackId': event['StackId'],
-                  'RequestId': event['RequestId'],
-                  'LogicalResourceId': event['LogicalResourceId'],
-                  'Data': data}
-  logger.debug('RESPONSE BODY:n' + json.dumps(responseBody))
-  try:
-    req = requests.put(event['ResponseURL'], data=json.dumps(responseBody))
-    if req.status_code != 200:
-      logger.debug(req.text)
-      raise Exception('Received non-200 response while sending response to CFN.')
-    return
-  except requests.exceptions.RequestException as e:
-    raise
+  pass
 
 
 def handler(event, context):
