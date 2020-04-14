@@ -18,7 +18,7 @@ Create a custom resource in your cloud formation template. Here's an example:
     Type: Custom::S3BucketTagger
     Properties:
       ServiceToken: !ImportValue
-        'Fn::Sub': '${AWS::Region}-set-bucket-tags-macro-SetBucketTagsFunctionArn'
+        'Fn::Sub': '${AWS::Region}-set-bucket-tags-macro-FunctionArn'
       BucketName: !Ref S3Bucket
 ```
 
