@@ -23,11 +23,12 @@ class TestHandler(unittest.TestCase):
         'Value': 'some_project'
       }
     ]
-    tags = app.add_owner_email_tag(tags=tags, synapse_username=synapse_username)
+    email = 'janedoe@synapse.org'
+    tags = app.add_owner_email_tag(tags=tags, email=email)
     keys = [tag['Key'] for tag in tags]
     self.assertIn('aws:servicecatalog:provisioningPrincipalArn', keys)
     self.assertIn('Department', keys)
     self.assertIn('Project', keys)
     self.assertIn('OwnerEmail', keys)
     owner_email = next((tag['Value'] for tag in tags if tag['Key'] == 'OwnerEmail'), None)
-    self.assertEqual(owner_email, 'janedoe@synapse.org')
+    self.assertEqual(owner_email, email)

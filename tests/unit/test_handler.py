@@ -16,8 +16,8 @@ class TestHandler(unittest.TestCase):
     with Stubber(s3) as stubber, \
       patch('set_bucket_tags.app.get_bucket_name') as name_mock, \
       patch('set_bucket_tags.app.get_bucket_tags') as get_mock, \
-      patch('set_bucket_tags.app.get_principal_arn') as arn_mock, \
-      patch('set_bucket_tags.app.get_synapse_user_name') as syn_mock, \
+      patch('set_bucket_tags.app.get_principal_id') as arn_mock, \
+      patch('set_bucket_tags.app.get_synapse_email') as syn_mock, \
       patch('set_bucket_tags.app.add_owner_email_tag') as tags_mock:
         name_mock.return_value = 'some-improbable-bucket-name'
         tags_mock.return_value = [{ 'Key': 'OwnerEmail', 'Value': 'janedoe@synapse.org' }]

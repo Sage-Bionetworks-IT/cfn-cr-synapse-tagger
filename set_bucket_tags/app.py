@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 import traceback
 
 import boto3
@@ -41,41 +42,48 @@ def get_bucket_tags(bucket_name):
   return tags
 
 
-def get_principal_arn(tags):
+def get_principal_id(tags):
   '''Find the value of the principal arn among the bucket tags'''
   principal_arn_tag = 'aws:servicecatalog:provisioningPrincipalArn'
   for tag in tags:
     if tag.get('Key') == principal_arn_tag:
       principal_arn_value = tag.get('Value')
-      return principal_arn_value
+      principal_id = principal_arn_value.split('/')[-1]
+      return principal_id
   else:
     raise ValueError('Could not derive a provisioningPrincipalArn from tags')
 
 
-def get_synapse_user_name(principal_arn):
-  '''Use the synapse id embedded in the principal arn to look up the synapse user name'''
-  synapse_id = principal_arn.split('/')[-1]
-  if not synapse_id.isdigit():
-    error_msg = (f'The synapse_id {synapse_id} derived from the principal_arn'
-      f'{principal_arn} is in an unexpected format')
-    raise ValueError(error_msg)
+def get_synapse_email(synapse_id):
+  '''Use the synapse id to look up the synapse user name'''
   synapse_url = f'https://repo-prod.prod.sagebase.org/repo/v1/userProfile/{synapse_id}'
   response = requests.get(synapse_url)
   response.raise_for_status()
   user_profile = response.json()
   log.debug(f'Synapse user profile response: {user_profile}')
   user_name = user_profile.get('userName')
-  return user_name
+  synapse_email = f'{user_name}@synapse.org'
+  return synapse_email
 
 
-def add_owner_email_tag(tags, synapse_username):
-  '''Add an OwnerEmail tag for the synapse email based on synapse usename'''
-  synapse_email = f'{synapse_username}@synapse.org'
+def get_owner_email(principal_id):
+  email_check = re.compile(r"[^@]+@[^@]+\.[^@]+")
+  if principal_id.isdigit():
+    email = get_synapse_email(principal_id)
+  elif email_check.fullmatch(principal_id):
+    email = principal_id
+  else:
+    raise ValueError(f'Principal id value "{principal_id}" uses invalid format')
+  return email
+
+
+def add_owner_email_tag(tags, email):
+  '''Add an OwnerEmail tag to set of bucket tags'''
   owner_email_tag = next((tag for tag in tags if tag['Key'] == 'OwnerEmail'), None)
   if owner_email_tag:
-    owner_email_tag['Value'] = synapse_email
+    owner_email_tag['Value'] = email
   else:
-    new_owner_email_tag = { 'Key': 'OwnerEmail', 'Value': synapse_email}
+    new_owner_email_tag = { 'Key': 'OwnerEmail', 'Value': email}
     tags.append(new_owner_email_tag)
   return tags
 
@@ -88,9 +96,9 @@ def create_or_update(event, context):
   log.debug('Received event: ' + json.dumps(event, sort_keys=False))
   bucket_name = get_bucket_name(event)
   tags = get_bucket_tags(bucket_name)
-  principal_arn = get_principal_arn(tags)
-  synapse_username = get_synapse_user_name(principal_arn)
-  tags = add_owner_email_tag(tags, synapse_username)
+  principal_id = get_principal_id(tags)
+  email = get_owner_email(principal_id)
+  tags = add_owner_email_tag(tags, email)
   client = get_s3_client()
   tagging_response = client.put_bucket_tagging(
     Bucket=bucket_name,

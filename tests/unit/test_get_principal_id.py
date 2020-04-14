@@ -3,16 +3,16 @@ import unittest
 from set_bucket_tags import app
 
 
-class TestGetPrincipalArn(unittest.TestCase):
+class TestGetPrincipalId(unittest.TestCase):
 
   def test_tag_present(self):
     tags = [
       {'Key': 'heresatag', 'Value': 'heresatagvalue'},
       {'Key': 'theresatag', 'Value': 'theresatagvalue'},
-      {'Key': 'aws:servicecatalog:provisioningPrincipalArn', 'Value': 'foo'}
+      {'Key': 'aws:servicecatalog:provisioningPrincipalArn', 'Value': 'foo/bar'}
     ]
-    result = app.get_principal_arn(tags)
-    self.assertEqual(result, 'foo')
+    result = app.get_principal_id(tags)
+    self.assertEqual(result, 'bar')
 
 
   def test_tag_missing(self):
@@ -21,4 +21,4 @@ class TestGetPrincipalArn(unittest.TestCase):
         {'Key': 'heresatag', 'Value': 'heresatagvalue'},
         {'Key': 'theresatag', 'Value': 'theresatagvalue'}
       ]
-      app.get_principal_arn(tags)
+      app.get_principal_id(tags)
