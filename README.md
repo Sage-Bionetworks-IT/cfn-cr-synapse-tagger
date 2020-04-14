@@ -75,28 +75,28 @@ This requires the correct permissions to upload to bucket
 `bootstrap-awss3cloudformationbucket-19qromfd235z9`.
 
 ```shell script
-sam package --template-file .aws-sam/build/template.yaml \
+sam package --template-file template.yaml \
   --s3-bucket essentials-awss3lambdaartifactsbucket-x29ftznj6pqw \
-  --output-template-file .aws-sam/build/set-bucket-tags-macro.yaml
+  --output-template-file .aws-sam/build/cfn-cr-bucket-tagger.yaml
 
-aws s3 cp .aws-sam/build/template.yaml s3://bootstrap-awss3cloudformationbucket-19qromfd235z9/cfn-cr-bucket-tagger/master
+aws s3 cp .aws-sam/build/cfn-cr-bucket-tagger.yaml s3://bootstrap-awss3cloudformationbucket-19qromfd235z9/cfn-cr-bucket-tagger/master
 ```
 
 ## Install Lambda into AWS
 Create the following [sceptre](https://github.com/Sceptre/sceptre) file
 
-config/prod/set-bucket-tags-macro.yaml
+config/prod/cfn-cr-bucket-tagger.yaml
 ```yaml
 template_path: "remote/set-bucket-tags-macro.yaml"
-stack_name: "set-bucket-tags-macro"
+stack_name: "cfn-cr-bucket-tagger"
 hooks:
   before_launch:
-    - !cmd "curl https://s3.amazonaws.com/essentials-awss3lambdaartifactsbucket-x29ftznj6pqw/it-lambda-set-bucket-tags/master/set-bucket-tags-macro.yaml --create-dirs -o templates/remote/set-bucket-tags-macro.yaml"
+    - !cmd "curl https://s3.amazonaws.com/essentials-awss3lambdaartifactsbucket-x29ftznj6pqw/it-lambda-set-bucket-tags/master/cfn-cr-bucket-tagger.yaml --create-dirs -o templates/remote/cfn-cr-bucket-tagger.yaml"
 ```
 
 Install the lambda using sceptre:
 ```bash script
-sceptre --var "profile=my-profile" --var "region=us-east-1" launch prod/set-bucket-tags-macro
+sceptre --var "profile=my-profile" --var "region=us-east-1" launch prod/cfn-cr-bucket-tagger
 ```
 
 
