@@ -32,4 +32,22 @@ class TestHandler(unittest.TestCase):
             }})
         app.get_s3_client = MagicMock(return_value=s3)
         result = app.create_or_update({},{})
-        self.assertEqual(True, result)
+
+
+  def test_client_error(self):
+    s3 = boto3.client('s3')
+    with Stubber(s3) as stubber, self.assertRaises(Exception), \
+      patch('set_bucket_tags.app.get_bucket_name') as name_mock, \
+      patch('set_bucket_tags.app.get_bucket_tags') as get_mock, \
+      patch('set_bucket_tags.app.get_principal_id') as arn_mock, \
+      patch('set_bucket_tags.app.get_synapse_email') as syn_mock, \
+      patch('set_bucket_tags.app.add_owner_email_tag') as tags_mock:
+        name_mock.return_value = 'some-improbable-bucket-name'
+        tags_mock.return_value = [{ 'Key': 'OwnerEmail', 'Value': 'janedoe@synapse.org' }]
+        stubber.add_client_error(
+        method='get_bucket_tagging',
+        service_error_code='NoSuchBucket',
+        service_message='The specified bucket does not exist',
+        http_status_code=404)
+        app.get_s3_client = MagicMock(return_value=s3)
+        result = app.create_or_update({},{})

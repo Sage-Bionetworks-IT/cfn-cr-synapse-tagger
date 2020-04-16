@@ -105,12 +105,6 @@ def create_or_update(event, context):
     Tagging={ 'TagSet': tags }
     )
   log.debug(f'Tagging response: {tagging_response}')
-  if tagging_response.get('ResponseMetadata').get('HTTPStatusCode') == 204:
-    log.debug('Got 204 response, all is well')
-    return True
-  else:
-    log.debug('Tagging failed')
-    return False
 
 
 @helper.delete
