@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Custom Resource to sets tags on a S3 bucket
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  SetBucketTagsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: set_bucket_tags/
+      Handler: app.handler
+      Role: !GetAtt FunctionRole.Arn
+      Runtime: python3.6
+
+  FunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - !Ref BucketTagPolicy
+
+  BucketTagPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: GetAndPutBucketTags
+            Effect: 'Allow'
+            Action:
+              - 's3:GetBucketTagging'
+              - 's3:PutBucketTagging'
+            Resource: '*'
+
+Outputs:
+  SetBucketTagsFunctionName:
+    Value: !Ref SetBucketTagsFunction
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-FunctionName'
+  SetBucketTagsFunctionArn:
+    Value: !GetAtt SetBucketTagsFunction.Arn
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-FunctionArn'

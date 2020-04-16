@@ -1,0 +1,20 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pylint = "*"
+pytest = "*"
+requests-mock = "*"
+pre-commit = "*"
+
+[packages]
+aws-sam-cli = "*"
+boto3 = "*"
+botocore = "*"
+requests = "*"
+crhelper = "*"
+
+[requires]
+python_version = "3.6"
