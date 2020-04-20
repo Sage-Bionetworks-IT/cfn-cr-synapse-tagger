@@ -99,7 +99,6 @@ Install the lambda using sceptre:
 sceptre --var "profile=my-profile" --var "region=us-east-1" launch prod/cfn-cr-bucket-tagger
 ```
 
-
 ```
 
 ## Author

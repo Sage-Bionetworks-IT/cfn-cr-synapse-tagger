@@ -67,6 +67,7 @@ def get_synapse_email(synapse_id):
 
 
 def get_owner_email(principal_id):
+  '''Derive an email from a id'''
   email_check = re.compile(r"[^@]+@[^@]+\.[^@]+")
   if principal_id.isdigit():
     email = get_synapse_email(principal_id)
@@ -91,6 +92,7 @@ def add_owner_email_tag(tags, email):
 @helper.create
 @helper.update
 def create_or_update(event, context):
+  '''Handles customm resource create and update events'''
   log.debug('Received event: ' + json.dumps(event, sort_keys=False))
   log.info('Start SetBucketTags Lambda processing')
   log.debug('Received event: ' + json.dumps(event, sort_keys=False))
@@ -109,8 +111,10 @@ def create_or_update(event, context):
 
 @helper.delete
 def delete(event, context):
+  '''Handles custom resource delete events'''
   pass
 
 
 def handler(event, context):
+  '''Lambda handler, invokes custom resource helper'''
   helper(event, context)
