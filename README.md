@@ -1,4 +1,4 @@
-# it-lambda-set-bucket-tags
+# cfn-cr-bucket-tagger
 
 Cloudformation Custom Resource that sets tags for a S3 bucket.
 
