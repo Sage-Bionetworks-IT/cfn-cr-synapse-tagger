@@ -17,7 +17,7 @@ utility is used to deploy the macro that invokes the lambda as a CloudFormation 
 
 ### S3 Bucket
 
-Create a custom resource in your cloud formation template. Here's an example:
+Create a custom resource in your cloudformation template. Here's an example:
 ```yaml
   S3BucketTagger:
     Type: Custom::S3BucketTagger
@@ -36,7 +36,7 @@ for all user names.
 
 ### EC2 Instance
 
-Create a custom resource in your cloud formation template. Here's an example:
+Create a custom resource in your cloudformation template. Here's an example:
 ```yaml
   EC2InstanceTagger:
     Type: Custom::EC2InstanceTagger

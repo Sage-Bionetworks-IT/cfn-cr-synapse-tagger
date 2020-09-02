@@ -4,7 +4,7 @@ Description: Custom Resource to sets tags on a EC2 instances and S3 buckets
 
 Globals:
   Function:
-    Timeout: 100
+    Timeout: 180
 
 Resources:
   SetBucketTagsFunction:
@@ -50,7 +50,7 @@ Resources:
       CodeUri: set_instance_tags/
       Handler: app.handler
       Role: !GetAtt SetInstanceTagsFunctionRole.Arn
-      Runtime: python3.6
+      Runtime: python3.7
 
   SetInstanceTagsFunctionRole:
     Type: AWS::IAM::Role
