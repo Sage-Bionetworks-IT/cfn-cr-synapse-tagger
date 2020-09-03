@@ -1,2 +1,2 @@
 crhelper>=2.0,<3
-requests>=2.4,<3
+requests>=2.24,<3
