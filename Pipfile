@@ -13,8 +13,8 @@ pre-commit = "*"
 aws-sam-cli = "*"
 boto3 = "*"
 botocore = "*"
-requests = "~=2.24"
-crhelper = "~=2.0"
+requests = ">=2.23,<3"
+crhelper = ">=2.0,<3"
 
 [requires]
 python_version = "3.7"
