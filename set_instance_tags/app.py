@@ -45,6 +45,7 @@ def get_instance_tags(instance_id):
   # format tags to easily pass to create_tags
   for tag in tags:
     tag.pop("ResourceId")
+    tag.pop("ResourceType")
 
   return tags
 

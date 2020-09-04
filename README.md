@@ -47,7 +47,7 @@ Create a custom resource in your cloudformation template. Here's an example:
 ```
 
 The creation of the custom resource triggers the lambda, which pulls the current
-tags from `MyEC2`, derives new tags, and sets those on the instance.
+tags from `MyEC2` instance, derives new tags, and sets those on the instance.
 
 ## Development
 
