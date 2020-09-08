@@ -1,0 +1,13 @@
+{
+  "RequestType": "Delete",
+  "ServiceToken": "arn:aws:lambda:us-east-1:237179673806:function:set-synapse-tags-macro-SetInstanceTagsFunction-4PNZHTTFOFA3",
+  "ResponseURL" : "https://cloudformation-custom-resource-response-useast1.s3.amazonaws.com/arn:aws:cloudformation:us-east-1:237179673806:stack/cfn-cr-synapse-tagger/2F6e1d4640-79e7-11ea-afba-0ab7c9206afb",
+  "StackId" : "arn:aws:cloudformation:us-east-1:237179673806:stack/SC-237179673806-pp-h2q3pe4itf5sk/14a082d0-7e92-11ea-a356-120fbf0f0187",
+  "RequestId": "unique_id",
+  "LogicalResourceId": "EC2InstanceTagger",
+  "PhysicalResourceId": "SC-237179673806-pp-sbpwsts4rtiws_EC2InstanceTagger_F0S8EFKN",
+  "ResourceType": "Custom::EC2InstanceTagger",
+  "ResourceProperties": {
+    "InstanceId" : "i-06c3d8ac9b7953f43"
+  }
+}

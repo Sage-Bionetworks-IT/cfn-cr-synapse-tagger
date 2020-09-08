@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Custom Resource to sets tags on a S3 bucket
+Description: Custom Resource to sets tags on a EC2 instances and S3 buckets
 
 Globals:
   Function:
@@ -12,10 +12,10 @@ Resources:
     Properties:
       CodeUri: set_bucket_tags/
       Handler: app.handler
-      Role: !GetAtt FunctionRole.Arn
-      Runtime: python3.6
+      Role: !GetAtt SetBucketTagsFunctionRole.Arn
+      Runtime: python3.7
 
-  FunctionRole:
+  SetBucketTagsFunctionRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -44,12 +44,59 @@ Resources:
               - 's3:PutBucketTagging'
             Resource: '*'
 
+  SetInstanceTagsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: set_instance_tags/
+      Handler: app.handler
+      Role: !GetAtt SetInstanceTagsFunctionRole.Arn
+      Runtime: python3.7
+
+  SetInstanceTagsFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - !Ref InstanceTagPolicy
+
+  InstanceTagPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AccessInstanceTags
+            Effect: 'Allow'
+            Action:
+              - 'EC2:DescribeTags'
+              - 'EC2:CreateTags'
+              - 'EC2:DeleteTags'
+            Resource: '*'
+
+
 Outputs:
   SetBucketTagsFunctionName:
     Value: !Ref SetBucketTagsFunction
     Export:
       Name: !Sub '${AWS::Region}-${AWS::StackName}-FunctionName'
   SetBucketTagsFunctionArn:
+    Value: !GetAtt SetBucketTagsFunction.Arn
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-FunctionArn'
+  SetInstanceTagsFunctionName:
+    Value: !Ref SetBucketTagsFunction
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-FunctionName'
+  SetInstanceTagsFunctionArn:
     Value: !GetAtt SetBucketTagsFunction.Arn
     Export:
       Name: !Sub '${AWS::Region}-${AWS::StackName}-FunctionArn'
