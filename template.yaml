@@ -87,16 +87,16 @@ Outputs:
   SetBucketTagsFunctionName:
     Value: !Ref SetBucketTagsFunction
     Export:
-      Name: !Sub '${AWS::Region}-${AWS::StackName}-FunctionName'
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-SetBucketTagsFunctionName'
   SetBucketTagsFunctionArn:
     Value: !GetAtt SetBucketTagsFunction.Arn
     Export:
-      Name: !Sub '${AWS::Region}-${AWS::StackName}-FunctionArn'
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-SetBucketTagsFunctionArn'
   SetInstanceTagsFunctionName:
-    Value: !Ref SetBucketTagsFunction
+    Value: !Ref SetInstanceTagsFunction
     Export:
-      Name: !Sub '${AWS::Region}-${AWS::StackName}-FunctionName'
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-SetInstanceTagsFunctionName'
   SetInstanceTagsFunctionArn:
-    Value: !GetAtt SetBucketTagsFunction.Arn
+    Value: !GetAtt SetInstanceTagsFunction.Arn
     Export:
-      Name: !Sub '${AWS::Region}-${AWS::StackName}-FunctionArn'
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-SetInstanceTagsFunctionArn'
