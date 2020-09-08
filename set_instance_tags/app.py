@@ -109,6 +109,7 @@ def create_or_update(event, context):
   email = get_owner_email(principal_id)
   tags = add_owner_email_tag(tags, email)
   client = get_ec2_client()
+  log.debug(f'Tags to apply: {tags}')
   tagging_response = client.create_tags(
     Resources=[instance_id],
     Tags=tags

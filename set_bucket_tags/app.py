@@ -102,6 +102,7 @@ def create_or_update(event, context):
   email = get_owner_email(principal_id)
   tags = add_owner_email_tag(tags, email)
   client = get_s3_client()
+  log.debug(f'Tags to apply: {tags}')
   tagging_response = client.put_bucket_tagging(
     Bucket=bucket_name,
     Tagging={ 'TagSet': tags }
