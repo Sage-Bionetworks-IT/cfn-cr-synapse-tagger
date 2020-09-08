@@ -19,12 +19,12 @@ utility is used to deploy the macro that invokes the lambda as a CloudFormation 
 
 Create a custom resource in your cloudformation template. Here's an example:
 ```yaml
-  S3BucketTagger:
-    Type: Custom::S3BucketTagger
+  TagBucket:
+    Type: Custom::SynapseTagger
     Properties:
       ServiceToken: !ImportValue
         'Fn::Sub': '${AWS::Region}-cfn-cr-synapse-tagger-SetBucketTagsFunctionArn'
-      BucketName: !Ref S3Bucket
+      BucketName: !Ref MyBucket
 ```
 
 The creation of the custom resource triggers the lambda, which pulls the current
@@ -38,8 +38,8 @@ for all user names.
 
 Create a custom resource in your cloudformation template. Here's an example:
 ```yaml
-  EC2InstanceTagger:
-    Type: Custom::EC2InstanceTagger
+  TagInstance:
+    Type: Custom::SynapseTagger
     Properties:
       ServiceToken: !ImportValue
         'Fn::Sub': '${AWS::Region}-cfn-cr-synapse-tagger-SetInstanceTagsFunctionArn'
