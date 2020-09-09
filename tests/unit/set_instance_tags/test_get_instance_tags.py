@@ -25,11 +25,7 @@ class TestGetInstanceTags(unittest.TestCase):
       app.get_ec2_client = MagicMock(return_value=ec2)
       valid_instance_id ='some_reasonable_instance_id'
       result = app.get_instance_tags(valid_instance_id)
-      formatted_tags = [
-        {'Key': 'heresatag', 'Value': 'heresatagvalue'},
-        {'Key': 'theresatag', 'Value': 'theresatagvalue'}
-      ]
-      self.assertEqual(formatted_tags, result)
+      self.assertEqual(tags, result)
 
 
   def test_invalid_instance(self):

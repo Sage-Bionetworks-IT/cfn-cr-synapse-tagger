@@ -1,4 +1,3 @@
-import json
 import unittest
 
 from set_instance_tags import app

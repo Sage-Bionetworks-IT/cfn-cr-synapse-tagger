@@ -42,11 +42,6 @@ def get_instance_tags(instance_id):
   if not tags or len(tags) == 0:
     raise Exception(f'No tags returned, received: {response}')
 
-  # format tags to easily pass to create_tags
-  for tag in tags:
-    tag.pop("ResourceId")
-    tag.pop("ResourceType")
-
   return tags
 
 
@@ -96,6 +91,23 @@ def add_owner_email_tag(tags, email):
     tags.append(new_owner_email_tag)
   return tags
 
+def filter_tags(tags):
+  '''filter the tags list'''
+
+  f_tags = []
+
+  # keys starting with 'aws:' are reserved for internal use
+  for tag in tags:
+    if not tag["Key"].startswith("aws:"):
+      f_tags.append(tag)
+
+  # only keep key,value info to pass to ec2.create_tags
+  for f_tag in f_tags:
+    f_tag.pop("ResourceId")
+    f_tag.pop("ResourceType")
+
+  return f_tags
+
 
 @helper.create
 @helper.update
@@ -108,11 +120,12 @@ def create_or_update(event, context):
   principal_id = get_principal_id(tags)
   email = get_owner_email(principal_id)
   tags = add_owner_email_tag(tags, email)
+  f_tags = filter_tags(tags)
+  log.debug(f'Tags to apply: {f_tags}')
   client = get_ec2_client()
-  log.debug(f'Tags to apply: {tags}')
   tagging_response = client.create_tags(
     Resources=[instance_id],
-    Tags=tags
+    Tags=f_tags
   )
   log.debug(f'Tagging response: {tagging_response}')
 
