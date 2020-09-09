@@ -1,2 +1,2 @@
 crhelper~=2.0.6
-requests~=2.23.0
+synapseclient~=2.2.0
