@@ -58,25 +58,13 @@ def get_principal_id(tags):
 
 
 def get_synapse_email(synapse_id):
-  '''Use the synapse id to look up the synapse user name'''
+  '''Derive an email from a id'''
   syn = synapseclient.Synapse()
   user_profile = syn.getUserProfile(synapse_id)
   log.debug(f'Synapse user profile: {user_profile}')
   user_name = user_profile.get('userName')
   synapse_email = f'{user_name}@synapse.org'
   return synapse_email
-
-
-def get_owner_email(principal_id):
-  '''Derive an email from a id'''
-  email_check = re.compile(r"[^@]+@[^@]+\.[^@]+")
-  if principal_id.isdigit():
-    email = get_synapse_email(principal_id)
-  elif email_check.fullmatch(principal_id):
-    email = principal_id
-  else:
-    raise ValueError(f'Principal id value "{principal_id}" uses invalid format')
-  return email
 
 
 def add_owner_email_tag(tags, email):
@@ -88,6 +76,7 @@ def add_owner_email_tag(tags, email):
     new_owner_email_tag = { 'Key': 'OwnerEmail', 'Value': email}
     tags.append(new_owner_email_tag)
   return tags
+
 
 def filter_tags(tags):
   '''filter the tags list'''
@@ -116,7 +105,7 @@ def create_or_update(event, context):
   instance_id = get_instance_id(event)
   tags = get_instance_tags(instance_id)
   principal_id = get_principal_id(tags)
-  email = get_owner_email(principal_id)
+  email = get_synapse_email(principal_id)
   tags = add_owner_email_tag(tags, email)
   f_tags = filter_tags(tags)
   log.debug(f'Tags to apply: {f_tags}')
