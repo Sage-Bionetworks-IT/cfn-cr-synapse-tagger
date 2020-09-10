@@ -15,11 +15,10 @@ class TestHandler(unittest.TestCase):
       patch('set_instance_tags.app.get_instance_id') as name_mock, \
       patch('set_instance_tags.app.get_instance_tags') as get_mock, \
       patch('set_instance_tags.app.get_principal_id') as arn_mock, \
-      patch('set_instance_tags.app.get_synapse_email') as syn_mock, \
-      patch('set_instance_tags.app.add_owner_email_tag') as tags_mock, \
-      patch('set_instance_tags.app.filter_tags') as filter_mock:
+      patch('set_instance_tags.app.get_synapse_userProfile') as profile_mock, \
+      patch('set_instance_tags.app.get_synapse_tags') as tags_mock:
         name_mock.return_value = 'some-improbable-instance-id'
-        filter_mock.return_value = [{ 'Key': 'OwnerEmail', 'Value': 'janedoe@synapse.org' }]
+        tags_mock.return_value = [{ 'Key': 'OwnerEmail', 'Value': 'janedoe@synapse.org' }]
         stubber.add_response(
           method='create_tags',
           service_response={

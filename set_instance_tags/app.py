@@ -1,6 +1,5 @@
 import json
 import logging
-import re
 import synapseclient
 import boto3
 
@@ -57,43 +56,35 @@ def get_principal_id(tags):
     raise ValueError('Could not derive a provisioningPrincipalArn from tags')
 
 
-def get_synapse_email(synapse_id):
-  '''Derive an email from a id'''
+def get_synapse_userProfile(synapse_id):
+  '''Get synapse user profile data'''
   syn = synapseclient.Synapse()
   user_profile = syn.getUserProfile(synapse_id)
   log.debug(f'Synapse user profile: {user_profile}')
-  user_name = user_profile.get('userName')
-  synapse_email = f'{user_name}@synapse.org'
-  return synapse_email
+
+  return user_profile
 
 
-def add_owner_email_tag(tags, email):
-  '''Add an OwnerEmail tag to set of EC2 tags'''
-  owner_email_tag = next((tag for tag in tags if tag['Key'] == 'OwnerEmail'), None)
-  if owner_email_tag:
-    owner_email_tag['Value'] = email
-  else:
-    new_owner_email_tag = { 'Key': 'OwnerEmail', 'Value': email}
-    tags.append(new_owner_email_tag)
+def get_synapse_tags(user_profile):
+  '''Derive synapse tags from synapse user profile data'''
+
+  tags = []
+  IGNORE_KEYS = ["createdOn"]
+  for key, value in user_profile.items():
+    if key in IGNORE_KEYS:
+      continue
+
+    # derive synapse email tag based on userName
+    if key == "userName":
+      synapse_email = f'{value}@synapse.org'
+      tags.append({'Key': 'synapse:email', 'Value': synapse_email})
+      tags.append({'Key': 'OwnerEmail', 'Value': synapse_email})  # legacy
+
+    tag = {'Key': f'synapse:{key}', 'Value': value}
+    tags.append(tag)
+
+  log.debug(f'Synapse tags: {tags}')
   return tags
-
-
-def filter_tags(tags):
-  '''filter the tags list'''
-
-  f_tags = []
-
-  # keys starting with 'aws:' are reserved for internal use
-  for tag in tags:
-    if not tag["Key"].startswith("aws:"):
-      f_tags.append(tag)
-
-  # only keep key,value info to pass to ec2.create_tags
-  for f_tag in f_tags:
-    f_tag.pop("ResourceId")
-    f_tag.pop("ResourceType")
-
-  return f_tags
 
 
 @helper.create
@@ -103,16 +94,15 @@ def create_or_update(event, context):
   log.debug('Received event: ' + json.dumps(event, sort_keys=False))
   log.info('Start Lambda processing')
   instance_id = get_instance_id(event)
-  tags = get_instance_tags(instance_id)
-  principal_id = get_principal_id(tags)
-  email = get_synapse_email(principal_id)
-  tags = add_owner_email_tag(tags, email)
-  f_tags = filter_tags(tags)
-  log.debug(f'Tags to apply: {f_tags}')
+  instance_tags = get_instance_tags(instance_id)
+  principal_id = get_principal_id(instance_tags)
+  user_profile = get_synapse_userProfile(principal_id)
+  synapse_tags = get_synapse_tags(user_profile)
+  log.debug(f'Tags to apply: {synapse_tags}')
   client = get_ec2_client()
   tagging_response = client.create_tags(
     Resources=[instance_id],
-    Tags=f_tags
+    Tags=synapse_tags
   )
   log.debug(f'Tagging response: {tagging_response}')
 
