@@ -12,6 +12,8 @@ MISSING_BUCKET_NAME_ERROR_MESSAGE = 'BucketName parameter is required'
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
+synapseclient.core.cache.CACHE_ROOT_DIR = '/tmp/.synapseCache'
+
 helper = CfnResource(
   json_logging=False, log_level='DEBUG', boto_level='DEBUG')
 
