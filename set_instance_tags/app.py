@@ -1,10 +1,8 @@
 import json
 import logging
 import re
-import traceback
-
+import synapseclient
 import boto3
-import requests
 
 from crhelper import CfnResource
 
@@ -13,6 +11,8 @@ MISSING_INSTANCE_ID_ERROR_MESSAGE = 'InstanceId parameter is required'
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
+
+synapseclient.core.cache.CACHE_ROOT_DIR = '/tmp/.synapseCache'
 
 helper = CfnResource(
   json_logging=False, log_level='DEBUG', boto_level='INFO')
@@ -59,11 +59,9 @@ def get_principal_id(tags):
 
 def get_synapse_email(synapse_id):
   '''Use the synapse id to look up the synapse user name'''
-  synapse_url = f'https://repo-prod.prod.sagebase.org/repo/v1/userProfile/{synapse_id}'
-  response = requests.get(synapse_url)
-  response.raise_for_status()
-  user_profile = response.json()
-  log.debug(f'Synapse user profile response: {user_profile}')
+  syn = synapseclient.Synapse()
+  user_profile = syn.getUserProfile(synapse_id)
+  log.debug(f'Synapse user profile: {user_profile}')
   user_name = user_profile.get('userName')
   synapse_email = f'{user_name}@synapse.org'
   return synapse_email

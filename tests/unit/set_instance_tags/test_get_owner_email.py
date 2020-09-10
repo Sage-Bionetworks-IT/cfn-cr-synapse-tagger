@@ -1,25 +1,34 @@
 import unittest
+import synapseclient
 
-import requests
-import requests_mock
-
+from synapseclient.core.exceptions import SynapseHTTPError
+from unittest.mock import patch, MagicMock
 from set_instance_tags import app
 
+def mock_get_user_profile(synapse_id):
+  jsmith_profile = {
+    "createdOn": "2020-06-18T16:34:18.000Z",
+    "firstName": "Joe",
+    "lastName": "Smith",
+    "ownerId": "1111111",
+    "userName": "jsmith"
+  }
+  VALID_USER_IDS = [jsmith_profile["ownerId"]]
 
-class TestHandler(unittest.TestCase):
+  if synapse_id not in VALID_USER_IDS:
+    raise SynapseHTTPError("404 Client Error: UserProfile cannot be found for: " + synapse_id)
+
+  return jsmith_profile
 
 
-  def test_valid_synapse_id(self):
-    valid_id = '3388489'
-    with requests_mock.Mocker() as mocker:
-      url = f'https://repo-prod.prod.sagebase.org/repo/v1/userProfile/{valid_id}'
-      mocker.get(
-        url,
-        status_code=200,
-        text='{"ownerId":"3388489","firstName":"Jane","lastName":"Doe","userName":"janedoe","summary":"","position":"Researcher","location":"Seattle, Washington, USA","industry":"","company":"Sage Bionetworks","url":"","createdOn":"2019-04-16T19:08:04.000Z"}')
-      result = app.get_owner_email(valid_id)
-    self.assertEqual(result, 'janedoe@synapse.org')
+class TestGetOwnerEmail(unittest.TestCase):
 
+  @patch('synapseclient.Synapse')
+  def test_valid_synapse_id(self, MockSynapse):
+    MockSynapse.return_value.getUserProfile=mock_get_user_profile
+    result = app.get_owner_email("1111111")
+    expected = "jsmith@synapse.org"
+    self.assertEqual(result, expected)
 
   def test_valid_sagebase_email(self):
     valid_id = 'jane.doe@sagebase.org'
