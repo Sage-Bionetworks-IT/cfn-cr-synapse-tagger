@@ -98,7 +98,7 @@ def create_or_update(event, context):
   synapse_tags = get_synapse_tags(user_profile)
   # put_bucket_tagging is a replace operation.  need to give it all
   # tags otherwise it will remove existing tags not in the list
-  all_tags = bucket_tags + synapse_tags
+  all_tags = list(bucket_tags + synapse_tags)
   log.debug(f'Tags to apply: {all_tags}')
   client = get_s3_client()
   tagging_response = client.put_bucket_tagging(
