@@ -85,6 +85,18 @@ def get_synapse_tags(user_profile):
   return tags
 
 
+def merge(list_x, list_y):
+  '''Merge two list of tags'''
+  z = []
+  for x in list_x:
+    z.append(x)
+
+  for y in list_y:
+    z.append(y)
+
+  return z
+
+
 @helper.create
 @helper.update
 def create_or_update(event, context):
@@ -93,15 +105,18 @@ def create_or_update(event, context):
   log.info('Start SetBucketTags Lambda processing')
   log.debug('Received event: ' + json.dumps(event, sort_keys=False))
   bucket_name = get_bucket_name(event)
-  tags = get_bucket_tags(bucket_name)
-  principal_id = get_principal_id(tags)
+  bucket_tags = get_bucket_tags(bucket_name)
+  principal_id = get_principal_id(bucket_tags)
   user_profile = get_synapse_userProfile(principal_id)
   synapse_tags = get_synapse_tags(user_profile)
-  log.debug(f'Tags to apply: {synapse_tags}')
+  # put_bucket_tagging is a replace operation.  need to give it all
+  # tags otherwise it will remove existing tags not in the list
+  all_tags = merge(bucket_tags, synapse_tags)
+  log.debug(f'Tags to apply: {all_tags}')
   client = get_s3_client()
   tagging_response = client.put_bucket_tagging(
     Bucket=bucket_name,
-    Tagging={ 'TagSet': synapse_tags }
+    Tagging={ 'TagSet': all_tags }
     )
   log.debug(f'Tagging response: {tagging_response}')
 
