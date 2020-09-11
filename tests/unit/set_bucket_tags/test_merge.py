@@ -1,8 +1,5 @@
 import unittest
-import synapseclient
 
-from synapseclient.core.exceptions import SynapseHTTPError
-from unittest.mock import patch, MagicMock
 from set_bucket_tags import app
 
 tags_a = [
