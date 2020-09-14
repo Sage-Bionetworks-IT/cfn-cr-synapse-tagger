@@ -53,7 +53,7 @@ def get_principal_id(tags):
     raise ValueError('Could not derive a provisioningPrincipalArn from tags')
 
 
-def get_synapse_userProfile(synapse_id):
+def get_synapse_user_profile(synapse_id):
   '''Get synapse user profile data'''
   syn = synapseclient.Synapse()
   user_profile = syn.getUserProfile(synapse_id)
@@ -94,7 +94,7 @@ def create_or_update(event, context):
   bucket_name = get_bucket_name(event)
   bucket_tags = get_bucket_tags(bucket_name)
   principal_id = get_principal_id(bucket_tags)
-  user_profile = get_synapse_userProfile(principal_id)
+  user_profile = get_synapse_user_profile(principal_id)
   synapse_tags = get_synapse_tags(user_profile)
   # put_bucket_tagging is a replace operation.  need to give it all
   # tags otherwise it will remove existing tags not in the list

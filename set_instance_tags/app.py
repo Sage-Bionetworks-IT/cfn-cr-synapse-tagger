@@ -56,7 +56,7 @@ def get_principal_id(tags):
     raise ValueError('Could not derive a provisioningPrincipalArn from tags')
 
 
-def get_synapse_userProfile(synapse_id):
+def get_synapse_user_profile(synapse_id):
   '''Get synapse user profile data'''
   syn = synapseclient.Synapse()
   user_profile = syn.getUserProfile(synapse_id)
@@ -96,7 +96,7 @@ def create_or_update(event, context):
   instance_id = get_instance_id(event)
   instance_tags = get_instance_tags(instance_id)
   principal_id = get_principal_id(instance_tags)
-  user_profile = get_synapse_userProfile(principal_id)
+  user_profile = get_synapse_user_profile(principal_id)
   synapse_tags = get_synapse_tags(user_profile)
   log.debug(f'Tags to apply: {synapse_tags}')
   client = get_ec2_client()

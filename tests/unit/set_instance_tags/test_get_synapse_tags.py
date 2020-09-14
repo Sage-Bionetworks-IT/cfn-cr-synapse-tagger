@@ -2,7 +2,7 @@ import unittest
 
 from set_instance_tags import app
 
-jsmith_profile = {
+TEST_USER_PROFILE = {
   "createdOn": "2020-06-18T16:34:18.000Z",
   "firstName": "Joe",
   "lastName": "Smith",
@@ -14,7 +14,7 @@ jsmith_profile = {
 class TestGetSynapseTags(unittest.TestCase):
 
   def test_happy(self):
-    result = app.get_synapse_tags(jsmith_profile)
+    result = app.get_synapse_tags(TEST_USER_PROFILE)
     expected = [
       {'Key': 'synapse:firstName', 'Value': 'Joe'},
       {'Key': 'synapse:lastName', 'Value': 'Smith'},

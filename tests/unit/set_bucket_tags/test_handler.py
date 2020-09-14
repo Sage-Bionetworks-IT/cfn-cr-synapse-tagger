@@ -1,9 +1,7 @@
-import json
 import unittest
 from unittest.mock import MagicMock, patch
 
 import boto3
-import botocore
 from botocore.stub import Stubber
 
 from set_bucket_tags import app
@@ -17,8 +15,8 @@ class TestHandler(unittest.TestCase):
       patch('set_bucket_tags.app.get_bucket_name') as name_mock, \
       patch('set_bucket_tags.app.get_bucket_tags') as get_mock, \
       patch('set_bucket_tags.app.get_principal_id') as arn_mock, \
-      patch('set_instance_tags.app.get_synapse_userProfile') as profile_mock, \
-      patch('set_instance_tags.app.get_synapse_tags') as tags_mock:
+      patch('set_bucket_tags.app.get_synapse_user_profile') as profile_mock, \
+      patch('set_bucket_tags.app.get_synapse_tags') as tags_mock:
         name_mock.return_value = 'some-improbable-bucket-name'
         tags_mock.return_value = [{ 'Key': 'OwnerEmail', 'Value': 'janedoe@synapse.org' }]
         stubber.add_response(
