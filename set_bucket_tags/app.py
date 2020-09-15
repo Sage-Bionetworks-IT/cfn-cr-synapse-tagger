@@ -1,6 +1,5 @@
 import json
 import logging
-import re
 import synapseclient
 import boto3
 
@@ -54,24 +53,34 @@ def get_principal_id(tags):
     raise ValueError('Could not derive a provisioningPrincipalArn from tags')
 
 
-def get_synapse_email(synapse_id):
-  '''Derive an email from a id'''
+def get_synapse_user_profile(synapse_id):
+  '''Get synapse user profile data'''
   syn = synapseclient.Synapse()
   user_profile = syn.getUserProfile(synapse_id)
   log.debug(f'Synapse user profile: {user_profile}')
-  user_name = user_profile.get('userName')
-  synapse_email = f'{user_name}@synapse.org'
-  return synapse_email
+
+  return user_profile
 
 
-def add_owner_email_tag(tags, email):
-  '''Add an OwnerEmail tag to set of bucket tags'''
-  owner_email_tag = next((tag for tag in tags if tag['Key'] == 'OwnerEmail'), None)
-  if owner_email_tag:
-    owner_email_tag['Value'] = email
-  else:
-    new_owner_email_tag = { 'Key': 'OwnerEmail', 'Value': email}
-    tags.append(new_owner_email_tag)
+def get_synapse_tags(user_profile):
+  '''Derive synapse tags from synapse user profile data'''
+
+  tags = []
+  IGNORE_KEYS = ["createdOn"]
+  for key, value in user_profile.items():
+    if key in IGNORE_KEYS:
+      continue
+
+    # derive synapse email tag based on userName
+    if key == "userName":
+      synapse_email = f'{value}@synapse.org'
+      tags.append({'Key': 'synapse:email', 'Value': synapse_email})
+      tags.append({'Key': 'OwnerEmail', 'Value': synapse_email})  # legacy
+
+    tag = {'Key': f'synapse:{key}', 'Value': value}
+    tags.append(tag)
+
+  log.debug(f'Synapse tags: {tags}')
   return tags
 
 
@@ -83,15 +92,18 @@ def create_or_update(event, context):
   log.info('Start SetBucketTags Lambda processing')
   log.debug('Received event: ' + json.dumps(event, sort_keys=False))
   bucket_name = get_bucket_name(event)
-  tags = get_bucket_tags(bucket_name)
-  principal_id = get_principal_id(tags)
-  email = get_synapse_email(principal_id)
-  tags = add_owner_email_tag(tags, email)
+  bucket_tags = get_bucket_tags(bucket_name)
+  principal_id = get_principal_id(bucket_tags)
+  user_profile = get_synapse_user_profile(principal_id)
+  synapse_tags = get_synapse_tags(user_profile)
+  # put_bucket_tagging is a replace operation.  need to give it all
+  # tags otherwise it will remove existing tags not in the list
+  all_tags = list(bucket_tags + synapse_tags)
+  log.debug(f'Tags to apply: {all_tags}')
   client = get_s3_client()
-  log.debug(f'Tags to apply: {tags}')
   tagging_response = client.put_bucket_tagging(
     Bucket=bucket_name,
-    Tagging={ 'TagSet': tags }
+    Tagging={ 'TagSet': all_tags }
     )
   log.debug(f'Tagging response: {tagging_response}')
 

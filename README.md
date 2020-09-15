@@ -1,6 +1,6 @@
 # cfn-cr-synapse-tagger
 
-Cloudformation Custom Resource that sets tags Synapse tags on AWS resources.
+Cloudformation Custom Resource to apply Synapse metadata to AWS resources as tags.
 
 Inventory of source code and supporting files:
 
