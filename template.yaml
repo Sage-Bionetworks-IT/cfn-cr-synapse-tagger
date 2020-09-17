@@ -2,18 +2,27 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Custom Resource to sets tags on a EC2 instances and S3 buckets
 
+Parameters:
+  TeamToRoleArnMapParamName:
+    Description: 'The TeamToRoleArnMap parameter name in the SSM parameter store'
+    Type: String
+    Default: '/service-catalog/TeamToRoleArnMap'
+
 Globals:
   Function:
     Timeout: 180
+    Runtime: python3.7
+    Handler: app.handler
 
 Resources:
   SetBucketTagsFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: set_bucket_tags/
-      Handler: app.handler
       Role: !GetAtt SetBucketTagsFunctionRole.Arn
-      Runtime: python3.7
+      Environment:
+        Variables:
+          TEAM_TO_ROLE_ARN_MAP_PARAM_NAME: !Ref TeamToRoleArnMapParamName
 
   SetBucketTagsFunctionRole:
     Type: AWS::IAM::Role
@@ -30,6 +39,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - !Ref BucketTagPolicy
+        - !Ref SsmManagedPolicy
 
   BucketTagPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -48,9 +58,10 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: set_instance_tags/
-      Handler: app.handler
       Role: !GetAtt SetInstanceTagsFunctionRole.Arn
-      Runtime: python3.7
+      Environment:
+        Variables:
+          TEAM_TO_ROLE_ARN_MAP_PARAM_NAME: !Ref TeamToRoleArnMapParamName
 
   SetInstanceTagsFunctionRole:
     Type: AWS::IAM::Role
@@ -67,6 +78,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - !Ref InstanceTagPolicy
+        - !Ref SsmManagedPolicy
 
   InstanceTagPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -82,7 +94,17 @@ Resources:
               - 'EC2:DeleteTags'
             Resource: '*'
 
-
+  SsmManagedPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: GetParamAccess
+            Action:
+              - 'ssm:*'
+            Effect: Allow
+            Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${TeamToRoleArnMapParamName}'
 Outputs:
   SetBucketTagsFunctionName:
     Value: !Ref SetBucketTagsFunction
