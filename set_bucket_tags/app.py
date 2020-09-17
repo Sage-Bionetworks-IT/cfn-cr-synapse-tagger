@@ -156,8 +156,7 @@ def get_synapse_tags(synapse_id):
 def create_or_update(event, context):
   '''Handles customm resource create and update events'''
   log.debug('Received event: ' + json.dumps(event, sort_keys=False))
-  log.info('Start SetBucketTags Lambda processing')
-  log.debug('Received event: ' + json.dumps(event, sort_keys=False))
+  log.info('Start Lambda processing')
   bucket_name = get_bucket_name(event)
   bucket_tags = get_bucket_tags(bucket_name)
   principal_id = get_principal_id(bucket_tags)
