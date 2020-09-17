@@ -13,6 +13,14 @@ Inventory of source code and supporting files:
 The [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) is used to build and package the lambda code. The [sceptre](https://github.com/Sceptre/sceptre)
 utility is used to deploy the macro that invokes the lambda as a CloudFormation stack.
 
+## Prerequisites
+
+### Parameters
+
+To determine a team tag this custom resource assumes that there is a `/service-catalog/TeamToRoleArnMap`
+parameter in the AWS SSM parameter store.  The specification for that parameter is defined by the
+[synapse login app](https://github.com/Sage-Bionetworks/synapse-login-scipool#team-to-role-map).
+
 ## Use in a Cloudformation Template
 
 ### S3 Bucket
