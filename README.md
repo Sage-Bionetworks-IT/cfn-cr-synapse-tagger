@@ -117,6 +117,8 @@ config/prod/cfn-cr-synapse-tagger.yaml
 ```yaml
 template_path: "remote/cfn-cr-synapse-tagger.yaml"
 stack_name: "cfn-cr-synapse-tagger"
+parameters:
+  TeamToRoleArnMapParamName: "/service-catalog/TeamToRoleArnMap"
 hooks:
   before_launch:
     - !cmd "curl https://s3.amazonaws.com/essentials-awss3lambdaartifactsbucket-x29ftznj6pqw/it-lambda-set-bucket-tags/master/cfn-cr-synapse-tagger.yaml --create-dirs -o templates/remote/cfn-cr-synapse-tagger.yaml"

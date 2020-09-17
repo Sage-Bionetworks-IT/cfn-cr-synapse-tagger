@@ -2,12 +2,12 @@ import json
 import logging
 import synapseclient
 import boto3
+import os
 
 from crhelper import CfnResource
 
 
 MISSING_BUCKET_NAME_ERROR_MESSAGE = 'BucketName parameter is required'
-SSM_PARAMETER_TEAM_TO_ROLE_ARN_MAP = '/service-catalog/TeamToRoleArnMap'
 SYNAPSE_TAG_PREFIX = 'synapse'
 
 log = logging.getLogger(__name__)
@@ -75,7 +75,8 @@ def get_ssm_parameter(name):
 
 def get_synapse_team_ids():
   '''Get synapse team IDs'''
-  ssm_param = get_ssm_parameter(SSM_PARAMETER_TEAM_TO_ROLE_ARN_MAP)
+  TeamToRoleArnMap = os.getenv('TEAM_TO_ROLE_ARN_MAP_PARAM_NAME')
+  ssm_param = get_ssm_parameter(TeamToRoleArnMap)
   team_to_role_arn_map = json.loads(ssm_param["Parameter"]["Value"])
   log.debug(f'/service-catalog/TeamToRoleArnMap value: {team_to_role_arn_map}')
   team_ids = []
