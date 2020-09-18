@@ -27,7 +27,7 @@ class TestGetSynapseTags(unittest.TestCase):
       patch('set_bucket_tags.app.get_synapse_user_team_tags') as user_team_tags_mock:
         user_profile_tags_mock.return_value = MOCK_USER_PROFILE_TAGS
         user_team_tags_mock.return_value = MOCK_TEAM_TAGS
-        result = app.get_synapse_tags(1111111)
+        result = app.get_synapse_tags("1111111")
         expected = [
           {'Key': 'synapse:ownerId', 'Value': '1111111'},
           {'Key': 'synapse:email', 'Value': 'jsmith@synapse.org'},

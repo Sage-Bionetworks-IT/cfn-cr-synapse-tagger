@@ -1,30 +1,38 @@
 import unittest
+import boto3
 
+from unittest.mock import patch
 from set_instance_tags import app
+from botocore.stub import Stubber
 
-TEST_USER_PROFILE = {
-  "createdOn": "2020-06-18T16:34:18.000Z",
-  "firstName": "Joe",
-  "lastName": "Smith",
-  "ownerId": "1111111",
-  "userName": "jsmith"
-}
+MOCK_USER_PROFILE_TAGS = [
+    {'Key': 'synapse:ownerId', 'Value': '1111111'},
+    {'Key': 'synapse:email', 'Value': 'jsmith@synapse.org'},
+    {'Key': 'OwnerEmail', 'Value': 'jsmith@synapse.org'},
+    {'Key': 'synapse:userName', 'Value': 'jsmith'},
+]
 
+MOCK_TEAM_TAGS = [
+  {'Key': 'synapse:teamId', 'Value': '9999999'}
+]
 
 class TestGetSynapseTags(unittest.TestCase):
 
-  def test_happy(self):
-    result = app.get_synapse_tags(TEST_USER_PROFILE)
-    expected = [
-      {'Key': 'synapse:firstName', 'Value': 'Joe'},
-      {'Key': 'synapse:lastName', 'Value': 'Smith'},
-      {'Key': 'synapse:ownerId', 'Value': '1111111'},
-      {'Key': 'synapse:userName', 'Value': 'jsmith'},
-      {'Key': 'synapse:email', 'Value': 'jsmith@synapse.org'},
-      {'Key': 'OwnerEmail', 'Value': 'jsmith@synapse.org'}
-    ]
-    self.assertDictEqual(result[0], expected[0])
-
-  def test_sad(self):
-    with self.assertRaises(AttributeError):
-      app.get_synapse_tags("invalid input")
+  def test_happy_path(self):
+    ssm = boto3.client('ssm')
+    with Stubber(ssm) as stubber, \
+      patch('set_instance_tags.app.get_synapse_user_profile') as user_profile_mock, \
+      patch('set_instance_tags.app.get_synapse_user_profile_tags') as user_profile_tags_mock, \
+      patch('set_instance_tags.app.get_synapse_team_ids') as team_ids_mock, \
+      patch('set_instance_tags.app.get_synapse_user_team_tags') as user_team_tags_mock:
+        user_profile_tags_mock.return_value = MOCK_USER_PROFILE_TAGS
+        user_team_tags_mock.return_value = MOCK_TEAM_TAGS
+        result = app.get_synapse_tags("1111111")
+        expected = [
+          {'Key': 'synapse:ownerId', 'Value': '1111111'},
+          {'Key': 'synapse:email', 'Value': 'jsmith@synapse.org'},
+          {'Key': 'OwnerEmail', 'Value': 'jsmith@synapse.org'},
+          {'Key': 'synapse:userName', 'Value': 'jsmith'},
+          {'Key': 'synapse:teamId', 'Value': '9999999'}
+        ]
+        self.assertListEqual(result, expected)
