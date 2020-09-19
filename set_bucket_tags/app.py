@@ -88,11 +88,11 @@ def get_synapse_team_ids():
 
 
 def get_synapse_user_team_id(synapse_id, team_ids):
-  '''Get the Synapse team that the user is in
+  '''Get the first Synapse team in the given list that the user is in
   :param synapse_id: synapse user id
   :param team_ids: the synapse team ids
-  :returns: the synapse team id that the user is in, None if user is not
-            in any teams
+  :returns: the id of the first synapse team in the given list that the user is in,
+            None if user is not in any teams
   '''
   syn = get_synapse_client()
   for team_id in team_ids:
