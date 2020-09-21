@@ -2,7 +2,7 @@ import unittest
 import boto3
 
 from unittest.mock import patch
-from set_bucket_tags import app
+from set_tags import utils
 from botocore.stub import Stubber
 
 MOCK_GET_PARAMETER_RESPONSE = {
@@ -23,8 +23,8 @@ class TestGetSynapseTeamIds(unittest.TestCase):
   def test_happy_path(self):
     ssm = boto3.client('ssm')
     with Stubber(ssm) as stubber, \
-      patch('set_bucket_tags.app.get_ssm_parameter') as param_mock:
+      patch('set_tags.utils.get_ssm_parameter') as param_mock:
         param_mock.return_value = MOCK_GET_PARAMETER_RESPONSE
-        result = app.get_synapse_team_ids()
+        result = utils.get_synapse_team_ids()
         expected = ["1111111","2222222"]
         self.assertListEqual(result, expected)

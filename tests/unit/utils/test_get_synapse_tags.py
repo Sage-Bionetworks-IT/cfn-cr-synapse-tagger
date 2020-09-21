@@ -2,7 +2,7 @@ import unittest
 import boto3
 
 from unittest.mock import patch
-from set_bucket_tags import app
+from set_tags import utils
 from botocore.stub import Stubber
 
 MOCK_USER_PROFILE_TAGS = [
@@ -21,13 +21,13 @@ class TestGetSynapseTags(unittest.TestCase):
   def test_happy_path(self):
     ssm = boto3.client('ssm')
     with Stubber(ssm) as stubber, \
-      patch('set_bucket_tags.app.get_synapse_user_profile') as user_profile_mock, \
-      patch('set_bucket_tags.app.get_synapse_user_profile_tags') as user_profile_tags_mock, \
-      patch('set_bucket_tags.app.get_synapse_team_ids') as team_ids_mock, \
-      patch('set_bucket_tags.app.get_synapse_user_team_tags') as user_team_tags_mock:
+      patch('set_tags.utils.get_synapse_user_profile') as user_profile_mock, \
+      patch('set_tags.utils.get_synapse_user_profile_tags') as user_profile_tags_mock, \
+      patch('set_tags.utils.get_synapse_team_ids') as team_ids_mock, \
+      patch('set_tags.utils.get_synapse_user_team_tags') as user_team_tags_mock:
         user_profile_tags_mock.return_value = MOCK_USER_PROFILE_TAGS
         user_team_tags_mock.return_value = MOCK_TEAM_TAGS
-        result = app.get_synapse_tags("1111111")
+        result = utils.get_synapse_tags("1111111")
         expected = [
           {'Key': 'synapse:ownerId', 'Value': '1111111'},
           {'Key': 'synapse:email', 'Value': 'jsmith@synapse.org'},

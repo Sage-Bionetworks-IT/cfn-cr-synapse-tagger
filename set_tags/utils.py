@@ -4,10 +4,6 @@ import synapseclient
 import boto3
 import os
 
-from crhelper import CfnResource
-
-
-MISSING_BUCKET_NAME_ERROR_MESSAGE = 'BucketName parameter is required'
 SYNAPSE_TAG_PREFIX = 'synapse'
 
 log = logging.getLogger(__name__)
@@ -15,38 +11,18 @@ log.setLevel(logging.DEBUG)
 
 synapseclient.core.cache.CACHE_ROOT_DIR = '/tmp/.synapseCache'
 
-helper = CfnResource(
-  json_logging=False, log_level='DEBUG', boto_level='DEBUG')
-
 
 def get_s3_client():
   return boto3.client('s3')
 
+def get_ec2_client():
+  return boto3.client('ec2')
+
 def get_synapse_client():
   return synapseclient.Synapse()
 
-def get_bucket_name(event):
-  '''Get the bucket name from event params sent to lambda'''
-  resource_properties = event.get('ResourceProperties')
-  bucket_name = resource_properties.get('BucketName')
-  if not bucket_name:
-    raise ValueError(MISSING_BUCKET_NAME_ERROR_MESSAGE)
-  return bucket_name
-
-
-def get_bucket_tags(bucket_name):
-  '''Look up the bucket tags'''
-  client = get_s3_client()
-  response = client.get_bucket_tagging(Bucket=bucket_name)
-  log.debug(f'S3 bucket tags response: {response}')
-  tags = response.get('TagSet')
-  if not tags or len(tags) == 0:
-    raise Exception(f'No tags returned, received: {response}')
-  return tags
-
-
 def get_principal_id(tags):
-  '''Find the value of the principal arn among the bucket tags'''
+  '''Find the value of the principal ARN among the resource tags'''
   principal_arn_tag = 'aws:servicecatalog:provisioningPrincipalArn'
   for tag in tags:
     if tag.get('Key') == principal_arn_tag:
@@ -56,7 +32,6 @@ def get_principal_id(tags):
   else:
     raise ValueError('Could not derive a provisioningPrincipalArn from tags')
 
-
 def get_synapse_user_profile(synapse_id):
   '''Get synapse user profile data'''
   syn = get_synapse_client()
@@ -64,14 +39,12 @@ def get_synapse_user_profile(synapse_id):
   log.debug(f'Synapse user profile: {user_profile}')
   return user_profile
 
-
 def get_ssm_parameter(name):
   '''Get an parameter from the SSM parameter store'''
   client = boto3.client('ssm')
   parameter = client.get_parameter(Name=name)
   log.debug(f'Synapse ssm parameter: {parameter}')
   return parameter
-
 
 def get_synapse_team_ids():
   '''Get synapse team IDs'''
@@ -85,7 +58,6 @@ def get_synapse_team_ids():
 
   log.debug(f'Synapse team IDs: {team_ids}')
   return team_ids
-
 
 def get_synapse_user_team_id(synapse_id, team_ids):
   '''Get the first Synapse team in the given list that the user is in
@@ -127,7 +99,6 @@ def get_synapse_user_profile_tags(user_profile, ignore_keys=["createdOn"]):
   log.debug(f'Synapse user profile tags: {tags}')
   return tags
 
-
 def get_synapse_user_team_tags(synapse_id, synapse_team_ids):
   '''Derive team tags from synapse team data'''
   tags = []
@@ -137,7 +108,6 @@ def get_synapse_user_team_tags(synapse_id, synapse_team_ids):
 
   log.debug(f'Synapse user team tags: {tags}')
   return tags
-
 
 def get_synapse_tags(synapse_id):
   '''Derive synapse tags to apply to SC resources'''
@@ -149,36 +119,3 @@ def get_synapse_tags(synapse_id):
   tags = list(synapse_user_tags + synapse_team_tags)
   log.debug(f'Synapse tags: {tags}')
   return tags
-
-
-@helper.create
-@helper.update
-def create_or_update(event, context):
-  '''Handles customm resource create and update events'''
-  log.debug('Received event: ' + json.dumps(event, sort_keys=False))
-  log.info('Start Lambda processing')
-  bucket_name = get_bucket_name(event)
-  bucket_tags = get_bucket_tags(bucket_name)
-  principal_id = get_principal_id(bucket_tags)
-  synapse_tags = get_synapse_tags(principal_id)
-  # put_bucket_tagging is a replace operation.  need to give it all
-  # tags otherwise it will remove existing tags not in the list
-  all_tags = list(bucket_tags + synapse_tags)
-  log.debug(f'Tags to apply: {all_tags}')
-  client = get_s3_client()
-  tagging_response = client.put_bucket_tagging(
-    Bucket=bucket_name,
-    Tagging={ 'TagSet': all_tags }
-    )
-  log.debug(f'Tagging response: {tagging_response}')
-
-
-@helper.delete
-def delete(event, context):
-  '''Handles custom resource delete events'''
-  pass
-
-
-def handler(event, context):
-  '''Lambda handler, invokes custom resource helper'''
-  helper(event, context)
