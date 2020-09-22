@@ -1,6 +1,22 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Custom Resource to sets tags on a EC2 instances and S3 buckets
+Description: >-
+  A Cloudformation custom resource to apply Sage Bionetworks Synapse data to cloud resources
+
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: "cfn-cr-synapse-tagger"
+    Description: >-
+      A Cloudformation custom resource to apply Sage Bionetworks Synapse data to cloud resources
+    Author: "Sage-Bionetworks"
+    SpdxLicenseId: "Apache-2.0"
+    # paths are relative to .aws-sam/build directory
+    LicenseUrl: "LICENSE"
+    ReadmeUrl: "README.md"
+    Labels: ["serverless", "custom-resource", "cloudformation", "synapse", "tags"]
+    HomePageUrl: "https://github.com/Sage-Bionetworks-IT/cfn-cr-synapse-tagger"
+    SemanticVersion: "0.0.1"
+    SourceCodeUrl: "https://github.com/Sage-Bionetworks-IT/cfn-cr-synapse-tagger/tree/0.0.1"
 
 Parameters:
   TeamToRoleArnMapParamName:
