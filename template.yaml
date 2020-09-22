@@ -18,8 +18,8 @@ Resources:
   SetBucketTagsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: set_tags/
-      Handler: set_bucket_tags.handler
+      CodeUri: .
+      Handler: set_tags/set_bucket_tags.handler
       Role: !GetAtt SetBucketTagsFunctionRole.Arn
       Environment:
         Variables:
@@ -58,8 +58,8 @@ Resources:
   SetInstanceTagsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: set_tags/
-      Handler: set_instance_tags.handler
+      CodeUri: .
+      Handler: set_tags/set_instance_tags.handler
       Role: !GetAtt SetInstanceTagsFunctionRole.Arn
       Environment:
         Variables:
