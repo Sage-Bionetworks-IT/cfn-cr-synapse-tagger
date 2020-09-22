@@ -64,8 +64,8 @@ the [pre-commit](https://pre-commit.com/) git hook.
 
 ### Create a local build
 
-```bash
-$ sam build --use-container
+```shell script
+$ sam build
 ```
 
 ### Run locally
@@ -82,17 +82,22 @@ Tests are defined in the `tests` folder in this project. Use PIP to install the
 $ python -m pytest tests/ -v
 ```
 
-## Deployment
-
-### Build
+### Run integration tests
+Running integration tests
+[requires docker](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-local-start-api.html)
 
 ```shell script
-sam build
+$ sam local invoke HelloWorldFunction --event events/event.json
 ```
 
+## Deployment
+
 ## Deploy Lambda to S3
-This requires the correct permissions to upload to bucket
-`bootstrap-awss3cloudformationbucket-19qromfd235z9`.
+Deployments are sent to the
+[Sage cloudformation repository](https://bootstrap-awss3cloudformationbucket-19qromfd235z9.s3.amazonaws.com/index.html)
+which requires permissions to upload to Sage
+`bootstrap-awss3cloudformationbucket-19qromfd235z9` and
+`essentials-awss3lambdaartifactsbucket-x29ftznj6pqw` buckets.
 
 ```shell script
 sam package --template-file template.yaml \
@@ -101,6 +106,25 @@ sam package --template-file template.yaml \
 
 aws s3 cp .aws-sam/build/cfn-cr-synapse-tagger.yaml s3://bootstrap-awss3cloudformationbucket-19qromfd235z9/cfn-cr-synapse-tagger/master
 ```
+
+## Publish Lambda
+
+### Private access
+Publishing the lambda makes it available in your AWS account.  It will be accessible in
+the [serverless application repository](https://console.aws.amazon.com/serverlessrepo).
+
+```shell script
+sam publish --template .aws-sam/build/cfn-cr-synapse-tagger.yaml
+```
+
+### Public access
+Making the lambda publicly accessible makes it available in the
+[global AWS serverless application repository](https://serverlessrepo.aws.amazon.com/applications)
+
+```shell script
+aws serverlessrepo put-application-policy \
+  --application-id <lambda ARN> \
+  --statements Principals=*,Actions=Deploy
 
 ## Install Lambda into AWS
 Create the following [sceptre](https://github.com/Sceptre/sceptre) file
@@ -120,8 +144,13 @@ sceptre --var "profile=my-profile" --var "region=us-east-1" launch prod/cfn-cr-s
 ```
 
 
-```
+### AWS Console
+Steps to deploy from AWS console.
 
-## Author
-
-[Tess Thyer](https://github.com/tthyer); Principal Data Engineer, Sage Bionetworks
+1. Login to AWS
+2. Access the
+[serverless application repository](https://console.aws.amazon.com/serverlessrepo)
+-> Available Applications
+3. Select application to install
+4. Enter Application settings
+5. Click Deploy
