@@ -22,7 +22,10 @@ def get_synapse_client():
   return synapseclient.Synapse()
 
 def get_principal_id(tags):
-  '''Find the value of the principal ARN among the resource tags'''
+  '''Find the value of the principal ARN among the resource tags. The principal
+  ARN tag is applied by AWS and it's value should be in the following format
+  'arn:aws:sts::111111111:assumed-role/ServiceCatalogEndusers/1234567'
+  '''
   principal_arn_tag = 'aws:servicecatalog:provisioningPrincipalArn'
   for tag in tags:
     if tag.get('Key') == principal_arn_tag:
@@ -30,7 +33,7 @@ def get_principal_id(tags):
       principal_id = principal_arn_value.split('/')[-1]
       return principal_id
   else:
-    raise ValueError('Could not derive a provisioningPrincipalArn from tags')
+    raise ValueError(f'Expected to find {principal_arn_tag} in {tags}')
 
 def get_synapse_user_profile(synapse_id):
   '''Get synapse user profile data'''
@@ -47,7 +50,7 @@ def get_ssm_parameter(name):
   return parameter
 
 def get_synapse_team_ids():
-  '''Get synapse team IDs'''
+  '''Return the list of IDs of teams through which a user can access service catalog'''
   TeamToRoleArnMap = os.getenv('TEAM_TO_ROLE_ARN_MAP_PARAM_NAME')
   ssm_param = get_ssm_parameter(TeamToRoleArnMap)
   team_to_role_arn_map = json.loads(ssm_param["Parameter"]["Value"])
