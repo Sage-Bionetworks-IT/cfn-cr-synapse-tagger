@@ -68,12 +68,6 @@ the [pre-commit](https://pre-commit.com/) git hook.
 $ sam build
 ```
 
-### Run locally
-
-```bash
-$ sam local invoke SetBucketTagsFunction --event events/create.json
-```
-
 ### Run unit tests
 Tests are defined in the `tests` folder in this project. Use PIP to install the
 [pytest](https://docs.pytest.org/en/latest/) and run unit tests.
@@ -92,7 +86,7 @@ $ sam local invoke HelloWorldFunction --event events/event.json
 
 ## Deployment
 
-## Deploy Lambda to S3
+### Deploy Lambda to S3
 Deployments are sent to the
 [Sage cloudformation repository](https://bootstrap-awss3cloudformationbucket-19qromfd235z9.s3.amazonaws.com/index.html)
 which requires permissions to upload to Sage
@@ -125,8 +119,11 @@ Making the lambda publicly accessible makes it available in the
 aws serverlessrepo put-application-policy \
   --application-id <lambda ARN> \
   --statements Principals=*,Actions=Deploy
+```
 
 ## Install Lambda into AWS
+
+### Sceptre
 Create the following [sceptre](https://github.com/Sceptre/sceptre) file
 
 config/prod/cfn-cr-synapse-tagger.yaml
@@ -142,7 +139,6 @@ Install the lambda using sceptre:
 ```bash script
 sceptre --var "profile=my-profile" --var "region=us-east-1" launch prod/cfn-cr-synapse-tagger
 ```
-
 
 ### AWS Console
 Steps to deploy from AWS console.
