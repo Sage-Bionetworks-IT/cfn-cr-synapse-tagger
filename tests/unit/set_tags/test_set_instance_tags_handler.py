@@ -13,14 +13,18 @@ class TestSetInstanceTagsHandler(unittest.TestCase):
     ec2 = utils.get_ec2_client()
     with Stubber(ec2) as stubber, \
       patch('set_tags.set_instance_tags.get_instance_id') as name_mock, \
-      patch('set_tags.set_instance_tags.get_instance_tags') as get_mock, \
+      patch('set_tags.set_instance_tags.get_instance_tags') as instance_tags_mock, \
       patch('set_tags.utils.get_principal_id') as arn_mock, \
       patch('set_tags.utils.get_synapse_user_profile') as profile_mock, \
-      patch('set_tags.utils.get_synapse_tags') as tags_mock:
+      patch('set_tags.utils.get_synapse_tags') as synapse_tags_mock:
         name_mock.return_value = 'some-improbable-instance-id'
-        tags_mock.return_value = [{ 'Key': 'OwnerEmail', 'Value': 'janedoe@synapse.org' }]
+        synapse_tags_mock.return_value = [{ 'Key': 'synpase:email', 'Value': 'janedoe@synapse.org' }]
         stubber.add_response(
           method='create_tags',
+          expected_params={
+            'Resources': ['some-improbable-instance-id'],
+            'Tags': [{'Key': 'synpase:email', 'Value': 'janedoe@synapse.org'}]
+          },
           service_response={
             'ResponseMetadata': {
               'RequestId': '12345',
@@ -36,12 +40,12 @@ class TestSetInstanceTagsHandler(unittest.TestCase):
     ec2 = utils.get_ec2_client()
     with Stubber(ec2) as stubber, self.assertRaises(Exception), \
       patch('set_tags.set_instance_tags.get_instance_id') as name_mock, \
-      patch('set_tags.set_instance_tags.get_instance_tags') as get_mock, \
+      patch('set_tags.set_instance_tags.get_instance_tags') as instance_tags_mock, \
       patch('set_tags.utils.get_principal_id') as arn_mock, \
       patch('set_tags.utils.get_synapse_user_profile') as profile_mock, \
-      patch('set_tags.utils.get_synapse_tags') as tags_mock:
+      patch('set_tags.utils.get_synapse_tags') as synapse_tags_mock:
         name_mock.return_value = 'some-improbable-instance-id'
-        tags_mock.return_value = [{ 'Key': 'OwnerEmail', 'Value': 'janedoe@synapse.org' }]
+        synapse_tags_mock.return_value = [{ 'Key': 'synpase:email', 'Value': 'janedoe@synapse.org' }]
         stubber.add_client_error(
         method='get_instance_tagging',
         service_error_code='NoSuchInstance',
