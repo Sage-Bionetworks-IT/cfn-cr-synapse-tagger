@@ -1,6 +1,6 @@
 import unittest
 
-from set_bucket_tags import app
+from set_tags import utils
 
 
 class TestGetPrincipalId(unittest.TestCase):
@@ -11,7 +11,7 @@ class TestGetPrincipalId(unittest.TestCase):
       {'Key': 'theresatag', 'Value': 'theresatagvalue'},
       {'Key': 'aws:servicecatalog:provisioningPrincipalArn', 'Value': 'foo/bar'}
     ]
-    result = app.get_principal_id(tags)
+    result = utils.get_principal_id(tags)
     self.assertEqual(result, 'bar')
 
 
@@ -21,4 +21,4 @@ class TestGetPrincipalId(unittest.TestCase):
         {'Key': 'heresatag', 'Value': 'heresatagvalue'},
         {'Key': 'theresatag', 'Value': 'theresatagvalue'}
       ]
-      app.get_principal_id(tags)
+      utils.get_principal_id(tags)

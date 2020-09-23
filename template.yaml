@@ -18,18 +18,28 @@ Metadata:
     SemanticVersion: "0.0.1"
     SourceCodeUrl: "https://github.com/Sage-Bionetworks-IT/cfn-cr-synapse-tagger/tree/0.0.1"
 
+Parameters:
+  TeamToRoleArnMapParamName:
+    Description: 'The TeamToRoleArnMap parameter name in the SSM parameter store'
+    Type: String
+    Default: '/service-catalog/TeamToRoleArnMap'
+
 Globals:
   Function:
     Timeout: 180
     Runtime: python3.7
+    Handler: app.handler
 
 Resources:
   SetBucketTagsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: set_bucket_tags/
-      Handler: app.handler
+      CodeUri: .
+      Handler: set_tags/set_bucket_tags.handler
       Role: !GetAtt SetBucketTagsFunctionRole.Arn
+      Environment:
+        Variables:
+          TEAM_TO_ROLE_ARN_MAP_PARAM_NAME: !Ref TeamToRoleArnMapParamName
 
   SetBucketTagsFunctionRole:
     Type: AWS::IAM::Role
@@ -46,6 +56,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - !Ref BucketTagPolicy
+        - !Ref SsmManagedPolicy
 
   BucketTagPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -63,9 +74,12 @@ Resources:
   SetInstanceTagsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: set_instance_tags/
-      Handler: app.handler
+      CodeUri: .
+      Handler: set_tags/set_instance_tags.handler
       Role: !GetAtt SetInstanceTagsFunctionRole.Arn
+      Environment:
+        Variables:
+          TEAM_TO_ROLE_ARN_MAP_PARAM_NAME: !Ref TeamToRoleArnMapParamName
 
   SetInstanceTagsFunctionRole:
     Type: AWS::IAM::Role
@@ -82,6 +96,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - !Ref InstanceTagPolicy
+        - !Ref SsmManagedPolicy
 
   InstanceTagPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -97,7 +112,17 @@ Resources:
               - 'EC2:DeleteTags'
             Resource: '*'
 
-
+  SsmManagedPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: GetParamAccess
+            Action:
+              - 'ssm:*'
+            Effect: Allow
+            Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${TeamToRoleArnMapParamName}'
 Outputs:
   SetBucketTagsFunctionName:
     Value: !Ref SetBucketTagsFunction
