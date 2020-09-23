@@ -13,7 +13,7 @@ TEST_USER_PROFILE = {
 
 class TestGetSynapseUserProfileTags(unittest.TestCase):
 
-  def test_happy_default_ignore(self):
+  def test_happy_default_exclude(self):
     result = utils.get_synapse_user_profile_tags(TEST_USER_PROFILE)
     expected = [
         {'Key': 'synapse:firstName', 'Value': 'Joe'},
@@ -26,7 +26,7 @@ class TestGetSynapseUserProfileTags(unittest.TestCase):
     ]
     self.assertListEqual(result, expected)
 
-  def test_happy_mulitple_ignores(self):
+  def test_happy_mulitple_excludes(self):
     result = utils.get_synapse_user_profile_tags(TEST_USER_PROFILE,
                                                ["createdOn","company","firstName","lastName"])
     expected = [
@@ -37,7 +37,7 @@ class TestGetSynapseUserProfileTags(unittest.TestCase):
     ]
     self.assertListEqual(result, expected)
 
-  def test_happy_ignores_user_name(self):
+  def test_happy_excludes_user_name(self):
     result = utils.get_synapse_user_profile_tags(TEST_USER_PROFILE, ["userName"])
     expected = [
         {'Key': 'synapse:createdOn', 'Value': '2020-06-18T16:34:18.000Z'},
