@@ -22,6 +22,28 @@ def get_instance_id(event):
   return instance_id
 
 
+def get_volume_ids(instance_id):
+  '''Get the IDs of the volumes that are attached to the instance
+  :param id: the instance ID
+  :return a list of volume IDs
+  '''
+  client = utils.get_ec2_client()
+  response = client.describe_volumes(
+    Filters=[
+      {
+        'Name': 'attachment.instance-id',
+        'Values': [instance_id]
+      },
+    ]
+  )
+  volume_ids = []
+  volumes = response['Volumes']
+  for volume in volumes:
+    volume_ids.append(volume['VolumeId'])
+
+  return volume_ids
+
+
 def get_instance_tags(instance_id):
   '''Look up the instance tags'''
   client = utils.get_ec2_client()
@@ -36,6 +58,16 @@ def get_instance_tags(instance_id):
   return tags
 
 
+def apply_tags(id, tags):
+  '''Apply tags to an EC2 resource'''
+  client = utils.get_ec2_client()
+  response = client.create_tags(
+    Resources=[id],
+    Tags=tags
+  )
+  log.debug(f'Apply tags response: {response}')
+
+
 @helper.create
 @helper.update
 def create_or_update(event, context):
@@ -46,13 +78,12 @@ def create_or_update(event, context):
   instance_tags = get_instance_tags(instance_id)
   principal_id = utils.get_principal_id(instance_tags)
   synapse_tags = utils.get_synapse_tags(principal_id)
-  log.debug(f'Tags to apply: {synapse_tags}')
-  client = utils.get_ec2_client()
-  tagging_response = client.create_tags(
-    Resources=[instance_id],
-    Tags=synapse_tags
-  )
-  log.debug(f'Tagging response: {tagging_response}')
+  log.debug(f'Apply tags: {synapse_tags} to instance {instance_id}')
+  apply_tags(instance_id, synapse_tags)
+  volume_ids = get_volume_ids(instance_id)
+  log.debug(f'Apply tags: {synapse_tags} to volume {volume_ids}')
+  for volume_id in volume_ids:
+    apply_tags(volume_id, synapse_tags)
 
 
 @helper.delete
