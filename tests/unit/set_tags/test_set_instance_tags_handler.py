@@ -16,14 +16,28 @@ class TestSetInstanceTagsHandler(unittest.TestCase):
       patch('set_tags.set_instance_tags.get_instance_tags') as instance_tags_mock, \
       patch('set_tags.utils.get_principal_id') as arn_mock, \
       patch('set_tags.utils.get_synapse_user_profile') as profile_mock, \
+      patch('set_tags.utils.get_provisioned_product_name_tag') as product_name_tag_mock, \
+      patch('set_tags.utils.get_access_approved_role_tag') as approved_role_tag_mock, \
       patch('set_tags.utils.get_synapse_tags') as synapse_tags_mock:
         name_mock.return_value = 'some-improbable-instance-id'
+        product_name_tag_mock.return_value = {
+          'Key': 'Name',
+          'Value': 'my-product'
+        }
+        approved_role_tag_mock.return_value = {
+          'Key': 'Protected/AccessApprovedCaller',
+          'Value': 'AROATOOICTTHKNSFVWL5U:1234567'
+        }
         synapse_tags_mock.return_value = [{ 'Key': 'synpase:email', 'Value': 'janedoe@synapse.org' }]
         stubber.add_response(
           method='create_tags',
           expected_params={
             'Resources': ['some-improbable-instance-id'],
-            'Tags': [{'Key': 'synpase:email', 'Value': 'janedoe@synapse.org'}]
+            'Tags': [
+              {'Key': 'synpase:email', 'Value': 'janedoe@synapse.org'},
+              {'Key': 'Name', 'Value': 'my-product'},
+              {'Key': 'Protected/AccessApprovedCaller', 'Value': 'AROATOOICTTHKNSFVWL5U:1234567'},
+            ]
           },
           service_response={
             'ResponseMetadata': {

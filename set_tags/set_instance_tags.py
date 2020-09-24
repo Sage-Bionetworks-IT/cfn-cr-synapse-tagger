@@ -46,11 +46,17 @@ def create_or_update(event, context):
   instance_tags = get_instance_tags(instance_id)
   principal_id = utils.get_principal_id(instance_tags)
   synapse_tags = utils.get_synapse_tags(principal_id)
-  log.debug(f'Tags to apply: {synapse_tags}')
+  extra_tags = []
+  provisioned_product_name_tag = utils.get_provisioned_product_name_tag(instance_tags)
+  extra_tags.append(provisioned_product_name_tag)
+  access_approved_role_tag = utils.get_access_approved_role_tag(instance_tags)
+  extra_tags.append(access_approved_role_tag)
+  all_tags = list(synapse_tags + extra_tags)
+  log.debug(f'Tags to apply: {all_tags}')
   client = utils.get_ec2_client()
   tagging_response = client.create_tags(
     Resources=[instance_id],
-    Tags=synapse_tags
+    Tags=all_tags
   )
   log.debug(f'Tagging response: {tagging_response}')
 
