@@ -5,9 +5,11 @@ from botocore.stub import Stubber
 
 from set_tags import set_instance_tags
 from set_tags import utils
-
+from set_tags.utils import SYNAPSE_TAG_PREFIX
 
 class TestSetInstanceTagsHandler(unittest.TestCase):
+
+  SYNAPSE_EMAIL_TAG = { 'Key': f'{SYNAPSE_TAG_PREFIX}:email', 'Value': 'janedoe@synapse.org' }
 
   def test_happy_path(self):
     ec2 = utils.get_ec2_client()
@@ -28,13 +30,13 @@ class TestSetInstanceTagsHandler(unittest.TestCase):
           'Key': 'Protected/AccessApprovedCaller',
           'Value': 'AROATOOICTTHKNSFVWL5U:1234567'
         }
-        synapse_tags_mock.return_value = [{ 'Key': 'synpase:email', 'Value': 'janedoe@synapse.org' }]
+        synapse_tags_mock.return_value = [self.SYNAPSE_EMAIL_TAG]
         stubber.add_response(
           method='create_tags',
           expected_params={
             'Resources': ['some-improbable-instance-id'],
             'Tags': [
-              {'Key': 'synpase:email', 'Value': 'janedoe@synapse.org'},
+              self.SYNAPSE_EMAIL_TAG,
               {'Key': 'Name', 'Value': 'my-product'},
               {'Key': 'Protected/AccessApprovedCaller', 'Value': 'AROATOOICTTHKNSFVWL5U:1234567'},
             ]
@@ -59,7 +61,7 @@ class TestSetInstanceTagsHandler(unittest.TestCase):
       patch('set_tags.utils.get_synapse_user_profile') as profile_mock, \
       patch('set_tags.utils.get_synapse_tags') as synapse_tags_mock:
         name_mock.return_value = 'some-improbable-instance-id'
-        synapse_tags_mock.return_value = [{ 'Key': 'synpase:email', 'Value': 'janedoe@synapse.org' }]
+        synapse_tags_mock.return_value = [self.SYNAPSE_EMAIL_TAG]
         stubber.add_client_error(
         method='get_instance_tagging',
         service_error_code='NoSuchInstance',
