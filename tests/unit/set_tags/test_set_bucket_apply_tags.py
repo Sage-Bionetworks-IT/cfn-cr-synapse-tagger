@@ -35,15 +35,3 @@ class TestSetInstanceTagsHandler(unittest.TestCase):
           }})
       utils.get_s3_client = MagicMock(return_value=s3)
       result = set_bucket_tags.apply_tags(self.TEST_BUCKET_NAME, self.TEST_TAGS)
-
-
-  def test_client_error(self):
-    s3 = utils.get_s3_client()
-    with Stubber(s3) as stubber, self.assertRaises(Exception):
-      stubber.add_client_error(
-        method='put_bucket_tagging',
-        service_error_code='NoSuchBucket',
-        service_message='The specified bucket does not exist',
-        http_status_code=404)
-      utils.get_s3_client = MagicMock(return_value=s3)
-      result = set_bucket_tags.apply_tags(self.TEST_BUCKET_NAME, self.TEST_TAGS)
