@@ -133,7 +133,7 @@ def get_synapse_tags(synapse_id):
 def get_provisioned_product_name_tag(tags):
   '''Get provisioned product name among the resource tags.
   :param tags: the list of tags on the instance, assume to contain a provisioned product
-         ARN tag that is applied by AWS and it's value should be in the following format
+         ARN tag that is applied by AWS and its value should be in the following format
          'arn:aws:servicecatalog:us-east-1:123456712:stack/my-product/pp-mycpuogt2i45s'
   :return a dict containing the the product name tag
   '''
@@ -154,7 +154,7 @@ def get_provisioned_product_name_tag(tags):
 def get_access_approved_role_tag(tags):
   '''Get the access approve role tag from among the resource tags.
   :param tags: the list of tags on the instance, assume to contain a principal
-         ARN tag that is applied by AWS and it's value should be in the following format
+         ARN tag that is applied by AWS and its value should be in the following format
          'arn:aws:sts::111111111:assumed-role/ServiceCatalogEndusers/1234567'
   :return a dict containing the access approved role tag
   '''
