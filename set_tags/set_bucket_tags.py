@@ -34,6 +34,18 @@ def get_bucket_tags(bucket_name):
   return tags
 
 
+def apply_tags(name, tags):
+  '''Apply tags to an S3 resource'''
+  client = utils.get_s3_client()
+  response = client.put_bucket_tagging(
+    Bucket=name,
+    Tagging={
+      'TagSet': tags
+    }
+  )
+  log.debug(f'Apply tags response: {response}')
+
+
 @helper.create
 @helper.update
 def create_or_update(event, context):
@@ -47,13 +59,8 @@ def create_or_update(event, context):
   # put_bucket_tagging is a replace operation.  need to give it all
   # tags otherwise it will remove existing tags not in the list
   all_tags = list(bucket_tags + synapse_tags)
-  log.debug(f'Tags to apply: {all_tags}')
-  client = utils.get_s3_client()
-  tagging_response = client.put_bucket_tagging(
-    Bucket=bucket_name,
-    Tagging={ 'TagSet': all_tags }
-    )
-  log.debug(f'Tagging response: {tagging_response}')
+  log.debug(f'Apply tags: {all_tags} to bucket {bucket_name}')
+  apply_tags(bucket_name, all_tags)
 
 
 @helper.delete
