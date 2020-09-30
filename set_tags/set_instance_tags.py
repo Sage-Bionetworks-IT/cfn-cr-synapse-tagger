@@ -91,7 +91,7 @@ def create_or_update(event, context):
     apply_tags(volume_id, all_tags)
 
   log.debug(f'Apply tags: {all_tags} to instance {instance_id}')
-  apply_tags(instance_id, synapse_tags)
+  apply_tags(instance_id, all_tags)
 
 @helper.delete
 def delete(event, context):
