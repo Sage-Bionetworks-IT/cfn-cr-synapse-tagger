@@ -107,7 +107,7 @@ Resources:
           - Sid: AccessInstanceTags
             Effect: 'Allow'
             Action:
-              - 'EC2:DescribeTags'
+              - 'EC2:Describe*'
               - 'EC2:CreateTags'
               - 'EC2:DeleteTags'
               - 'iam:ListRoles'
