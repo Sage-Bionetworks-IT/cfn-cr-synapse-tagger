@@ -3,7 +3,7 @@ import unittest
 from set_tags import utils
 
 
-class TestGetSynapseOwnerlId(unittest.TestCase):
+class TestGetSynapseOwnerId(unittest.TestCase):
 
   def test_tag_present(self):
     tags = [
@@ -11,7 +11,7 @@ class TestGetSynapseOwnerlId(unittest.TestCase):
       {'Key': 'theresatag', 'Value': 'theresatagvalue'},
       {'Key': 'aws:servicecatalog:provisioningPrincipalArn', 'Value': 'foo/bar'}
     ]
-    result = utils.get_synapse_ower_id(tags)
+    result = utils.get_synapse_owner_id(tags)
     self.assertEqual(result, 'bar')
 
 
@@ -21,4 +21,4 @@ class TestGetSynapseOwnerlId(unittest.TestCase):
         {'Key': 'heresatag', 'Value': 'heresatagvalue'},
         {'Key': 'theresatag', 'Value': 'theresatagvalue'}
       ]
-      utils.get_synapse_ower_id(tags)
+      utils.get_synapse_owner_id(tags)

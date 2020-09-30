@@ -76,7 +76,7 @@ def create_or_update(event, context):
   log.info('Start Lambda processing')
   instance_id = get_instance_id(event)
   instance_tags = get_instance_tags(instance_id)
-  synapse_owner_id = utils.get_synapse_ower_id(instance_tags)
+  synapse_owner_id = utils.get_synapse_owner_id(instance_tags)
   synapse_tags = utils.get_synapse_tags(synapse_owner_id)
   extra_tags = []
   provisioned_product_name_tag = utils.get_provisioned_product_name_tag(instance_tags)

@@ -28,7 +28,7 @@ def get_iam_client():
 def get_synapse_client():
   return synapseclient.Synapse()
 
-def get_synapse_ower_id(tags):
+def get_synapse_owner_id(tags):
   '''Find the value of the principal ARN among the resource tags. The principal
   ARN tag is applied by AWS and it's value should be in the following format
   'arn:aws:sts::111111111:assumed-role/ServiceCatalogEndusers/1234567'
