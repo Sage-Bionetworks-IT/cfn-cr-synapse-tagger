@@ -110,6 +110,8 @@ Resources:
               - 'EC2:DescribeTags'
               - 'EC2:CreateTags'
               - 'EC2:DeleteTags'
+              - 'iam:ListRoles'
+              - 'iam:GetRole'
             Resource: '*'
 
   SsmManagedPolicy:

@@ -22,6 +22,9 @@ def get_s3_client():
 def get_ec2_client():
   return boto3.client('ec2')
 
+def get_iam_client():
+  return boto3.client('iam')
+
 def get_synapse_client():
   return synapseclient.Synapse()
 
@@ -126,3 +129,51 @@ def get_synapse_tags(synapse_id):
   tags = list(synapse_user_tags + synapse_team_tags)
   log.debug(f'Synapse tags: {tags}')
   return tags
+
+def get_provisioned_product_name_tag(tags):
+  '''Get provisioned product name among the resource tags.
+  :param tags: the list of tags on the instance, assume to contain a provisioned product
+         ARN tag that is applied by AWS and its value should be in the following format
+         'arn:aws:servicecatalog:us-east-1:123456712:stack/my-product/pp-mycpuogt2i45s'
+  :return a dict containing the the product name tag
+  '''
+  PRODUCT_ARN_TAG_KEY = 'aws:servicecatalog:provisionedProductArn'
+  for tag in tags:
+    if tag.get('Key') == PRODUCT_ARN_TAG_KEY:
+      provisioned_product_arn_value = tag.get('Value')
+      provisioned_product_arn_name = provisioned_product_arn_value.split('/')[-2]
+      provisioned_product_arn_tag = {
+        'Key': 'Name',
+        'Value': provisioned_product_arn_name
+      }
+      log.debug(f'provisioned product arn tag: {provisioned_product_arn_tag}')
+      return provisioned_product_arn_tag
+  else:
+    raise ValueError(f'Expected to find {PRODUCT_ARN_TAG_KEY} in {tags}')
+
+def get_access_approved_role_tag(tags):
+  '''Get the access approve role tag from among the resource tags.
+  :param tags: the list of tags on the instance, assume to contain a principal
+         ARN tag that is applied by AWS and its value should be in the following format
+         'arn:aws:sts::111111111:assumed-role/ServiceCatalogEndusers/1234567'
+  :return a dict containing the access approved role tag
+  '''
+  PRINCIPAL_ARN_TAG_KEY = 'aws:servicecatalog:provisioningPrincipalArn'
+  for tag in tags:
+    if tag.get('Key') == PRINCIPAL_ARN_TAG_KEY:
+      principal_arn_value = tag.get('Value')
+      principal_id = principal_arn_value.split('/')[-1]
+      assumed_role_name = principal_arn_value.split('/')[-2]
+      client = get_iam_client()
+      response = client.get_role(
+        RoleName=assumed_role_name
+      )
+      access_approved_role = response['Role']['RoleId']
+      access_approved_role_tag = {
+        'Key': 'Protected/AccessApprovedCaller',
+        'Value': f'{access_approved_role}:{principal_id}'
+      }
+      log.debug(f'access approved role tag: {access_approved_role_tag}')
+      return access_approved_role_tag
+  else:
+    raise ValueError(f'Expected to find {PRINCIPAL_ARN_TAG_KEY} in {tags}')
