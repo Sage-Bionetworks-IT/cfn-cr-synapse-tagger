@@ -1,7 +1,7 @@
 # cfn-cr-synapse-tagger
 
 Cloudformation Custom Resource used to apply tags to resources provisioned using the
-Sage Service Catalog.  
+Sage Service Catalog.
 
 ## Inventory of source code and supporting files:
 
@@ -28,7 +28,7 @@ AWS will apply the following tags when resources are provisioned with the Servic
 |aws:servicecatalog:provisionedProductArn   |arn:aws:servicecatalog:us-east-1:123456712:stack/my-product/pp-mycpuogt2i45s|
 
 This custom resource uses these tags to retrieve more information and applies
-them as additional tags on the provisioned resource. 
+them as additional tags on the provisioned resource.
 
 ### Parameters
 
