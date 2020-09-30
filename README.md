@@ -1,8 +1,9 @@
 # cfn-cr-synapse-tagger
 
-Cloudformation Custom Resource to apply Synapse metadata to AWS resources as tags.
+Cloudformation Custom Resource used to apply tags to resources provisioned using the
+Sage Service Catalog.  
 
-Inventory of source code and supporting files:
+## Inventory of source code and supporting files:
 
 - set_bucket_tags - Function to set tags on S3 buckets.
 - set_instance_tags - Function to set tags on EC2 instances.
@@ -14,6 +15,20 @@ The [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/lates
 utility is used to deploy the macro that invokes the lambda as a CloudFormation stack.
 
 ## Prerequisites
+
+This custom resource only works with when used with the
+[Synapse IDP](https://github.com/Sage-Bionetworks/synapse-login-scipool) and the
+[AWS Service Catalog](https://aws.amazon.com/servicecatalog).
+
+AWS will apply the following tags when resources are provisioned with the Service Catalog:
+
+|Key                                        |Value (something like)                                                    |
+|-------------------------------------------|--------------------------------------------------------------------------|
+|aws:servicecatalog:provisioningPrincipalArn|arn:aws:sts::123456712:assumed-role/ServiceCatalogEndusers/1234567        |
+|aws:servicecatalog:provisionedProductArn   |arn:aws:servicecatalog:us-east-1:123456712:stack/my-product/pp-mycpuogt2i45s|
+
+This custom resource uses these tags to retrieve more information and applies
+them as additional tags on the provisioned resource. 
 
 ### Parameters
 
