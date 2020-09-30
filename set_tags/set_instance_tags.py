@@ -78,16 +78,18 @@ def create_or_update(event, context):
   instance_tags = get_instance_tags(instance_id)
   principal_id = utils.get_principal_id(instance_tags)
   synapse_tags = utils.get_synapse_tags(principal_id)
-  volume_ids = get_volume_ids(instance_id)
   extra_tags = []
   provisioned_product_name_tag = utils.get_provisioned_product_name_tag(instance_tags)
   extra_tags.append(provisioned_product_name_tag)
   access_approved_role_tag = utils.get_access_approved_role_tag(instance_tags)
   extra_tags.append(access_approved_role_tag)
   all_tags = list(synapse_tags + extra_tags)
+
+  volume_ids = get_volume_ids(instance_id)
   log.debug(f'Apply tags: {all_tags} to volume {volume_ids}')
   for volume_id in volume_ids:
     apply_tags(volume_id, all_tags)
+
   log.debug(f'Apply tags: {all_tags} to instance {instance_id}')
   apply_tags(instance_id, synapse_tags)
 
