@@ -28,7 +28,7 @@ def get_iam_client():
 def get_synapse_client():
   return synapseclient.Synapse()
 
-def get_principal_id(tags):
+def get_synapse_owner_id(tags):
   '''Find the value of the principal ARN among the resource tags. The principal
   ARN tag is applied by AWS and it's value should be in the following format
   'arn:aws:sts::111111111:assumed-role/ServiceCatalogEndusers/1234567'
@@ -37,8 +37,8 @@ def get_principal_id(tags):
   for tag in tags:
     if tag.get('Key') == principal_arn_tag:
       principal_arn_value = tag.get('Value')
-      principal_id = principal_arn_value.split('/')[-1]
-      return principal_id
+      synapse_owner_id = principal_arn_value.split('/')[-1]
+      return synapse_owner_id
   else:
     raise ValueError(f'Expected to find {principal_arn_tag} in {tags}')
 
@@ -162,7 +162,7 @@ def get_access_approved_role_tag(tags):
   for tag in tags:
     if tag.get('Key') == PRINCIPAL_ARN_TAG_KEY:
       principal_arn_value = tag.get('Value')
-      principal_id = principal_arn_value.split('/')[-1]
+      synapse_owner_id = principal_arn_value.split('/')[-1]
       assumed_role_name = principal_arn_value.split('/')[-2]
       client = get_iam_client()
       response = client.get_role(
@@ -171,7 +171,7 @@ def get_access_approved_role_tag(tags):
       access_approved_role = response['Role']['RoleId']
       access_approved_role_tag = {
         'Key': 'Protected/AccessApprovedCaller',
-        'Value': f'{access_approved_role}:{principal_id}'
+        'Value': f'{access_approved_role}:{synapse_owner_id}'
       }
       log.debug(f'access approved role tag: {access_approved_role_tag}')
       return access_approved_role_tag
