@@ -9,11 +9,18 @@ TEST_USER_PROFILE = {
   "ownerId": "1111111",
   "userName": "jsmith",
   "company": "Sage Bionetworks",
+  "summary": "I'm a sager",
+  "position": "dev guy",
+  "location": "Seattle, WA",
+  "industry": "Life Sciences Research",
+  "profilePicureFileHandleId": "222222",
+  "url": "https://www.linkedin.com/company/sage-bionetworks/",
+  "teamName": "Sage Team"
 }
 
 class TestGetSynapseUserProfileTags(unittest.TestCase):
 
-  def test_happy_default_exclude(self):
+  def test_happy_default_include(self):
     result = utils.get_synapse_user_profile_tags(TEST_USER_PROFILE)
     expected = [
         {'Key': 'synapse:firstName', 'Value': 'Joe'},
@@ -23,12 +30,13 @@ class TestGetSynapseUserProfileTags(unittest.TestCase):
         {'Key': 'OwnerEmail', 'Value': 'jsmith@synapse.org'},
         {'Key': 'synapse:userName', 'Value': 'jsmith'},
         {'Key': 'synapse:company', 'Value': 'Sage Bionetworks'},
+        {'Key': 'synapse:teamName', 'Value': 'Sage Team'}
     ]
     self.assertListEqual(result, expected)
 
-  def test_happy_mulitple_excludes(self):
+  def test_happy_mulitple_includes(self):
     result = utils.get_synapse_user_profile_tags(TEST_USER_PROFILE,
-                                               ["createdOn","company","firstName","lastName"])
+                                               ["ownerId","userName"])
     expected = [
         {'Key': 'synapse:ownerId', 'Value': '1111111'},
         {'Key': 'synapse:email', 'Value': 'jsmith@synapse.org'},
@@ -37,13 +45,9 @@ class TestGetSynapseUserProfileTags(unittest.TestCase):
     ]
     self.assertListEqual(result, expected)
 
-  def test_happy_excludes_user_name(self):
-    result = utils.get_synapse_user_profile_tags(TEST_USER_PROFILE, ["userName"])
+  def test_happy_not_include_user_name(self):
+    result = utils.get_synapse_user_profile_tags(TEST_USER_PROFILE, ["ownerId"])
     expected = [
-        {'Key': 'synapse:createdOn', 'Value': '2020-06-18T16:34:18.000Z'},
-        {'Key': 'synapse:firstName', 'Value': 'Joe'},
-        {'Key': 'synapse:lastName', 'Value': 'Smith'},
-        {'Key': 'synapse:ownerId', 'Value': '1111111'},
-        {'Key': 'synapse:company', 'Value': 'Sage Bionetworks'},
+        {'Key': 'synapse:ownerId', 'Value': '1111111'}
     ]
     self.assertListEqual(result, expected)
