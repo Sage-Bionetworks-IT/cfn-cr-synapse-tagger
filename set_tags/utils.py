@@ -7,7 +7,8 @@ import os
 SYNAPSE_TAG_PREFIX = 'synapse'
 SYNAPSE_USER_PROFILE_EXCLUDES = [
   "createdOn", "etag", "summary", "profilePicureFileHandleId", "url",
-  "notificationSettings", "preferences"
+  "notificationSettings", "preferences", "position", "location",
+  "email", "emails", "openIds", "industry"
 ]
 
 log = logging.getLogger(__name__)
