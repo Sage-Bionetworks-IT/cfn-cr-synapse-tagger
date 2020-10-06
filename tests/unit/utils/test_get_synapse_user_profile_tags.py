@@ -51,3 +51,26 @@ class TestGetSynapseUserProfileTags(unittest.TestCase):
         {'Key': 'synapse:ownerId', 'Value': '1111111'}
     ]
     self.assertListEqual(result, expected)
+
+  def test_sanitiz_tag_values(self):
+    INVALID_CHAR_USER_PROFILE = {
+      "firstName": "Joe (Barry)",
+      "lastName": "Smith",
+      "ownerId": "1111111",
+      "userName": "jsmith",
+      "company": "Sage-Bionetworks in Seattle, WA",
+      "teamName": "CompOnc;Tesla;SysBio"
+    }
+
+    result = utils.get_synapse_user_profile_tags(INVALID_CHAR_USER_PROFILE)
+    expected = [
+        {'Key': 'synapse:firstName', 'Value': 'Joe  Barry '},
+        {'Key': 'synapse:lastName', 'Value': 'Smith'},
+        {'Key': 'synapse:ownerId', 'Value': '1111111'},
+        {'Key': 'synapse:email', 'Value': 'jsmith@synapse.org'},
+        {'Key': 'OwnerEmail', 'Value': 'jsmith@synapse.org'},
+        {'Key': 'synapse:userName', 'Value': 'jsmith'},
+        {'Key': 'synapse:company', 'Value': 'Sage-Bionetworks in Seattle  WA'},
+        {'Key': 'synapse:teamName', 'Value': 'CompOnc Tesla SysBio'}
+    ]
+    self.assertListEqual(result, expected)

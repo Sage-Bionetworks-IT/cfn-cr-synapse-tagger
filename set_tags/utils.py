@@ -3,6 +3,7 @@ import logging
 import synapseclient
 import boto3
 import os
+import re
 
 SYNAPSE_TAG_PREFIX = 'synapse'
 SYNAPSE_USER_PROFILE_INCLUDES = [
@@ -90,11 +91,19 @@ def get_synapse_user_profile_tags(user_profile, includes=SYNAPSE_USER_PROFILE_IN
   :param includes: list of Synapse userProfile data to create tags
          Note - no email tags are returned if userName is not in the list
   :return a list containing a dictionary of tags
+         Note - AWS tag restrictions only allow a subset of characters for tag values.
+         The returned list will contain sanitized tag values.
+         https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Using_Tags.html#tag-restrictions
   '''
+  VALID_TAG_CHARS = r'[^a-zA-Z0-9.+=_:@/\-]'
+
   tags = []
   for key, value in user_profile.items():
     if key not in includes:
       continue
+
+    # replace invalid characters with a space
+    value = re.sub(VALID_TAG_CHARS, ' ', value)
 
     # derive synapse email tag based on userName
     if key == "userName":
