@@ -5,8 +5,7 @@ Sage Service Catalog.
 
 ## Inventory of source code and supporting files:
 
-- set_bucket_tags - Function to set tags on S3 buckets.
-- set_instance_tags - Function to set tags on EC2 instances.
+- set_tags - Function to set tags on resources.
 - events - Invocation events that you can use to invoke the function.
 - tests - Unit tests for the application code.
 - template.yaml - A template that defines the application's AWS resources.
@@ -29,6 +28,17 @@ AWS will apply the following tags when resources are provisioned with the Servic
 
 This custom resource uses these tags to retrieve more information and applies
 them as additional tags on the provisioned resource.
+
+### Supported Tags
+
+#### All Resources
+* Synapse tags - Retrieve the [Synapse userProfile](https://docs.synapse.org/rest/org/sagebionetworks/repo/model/UserProfile.html)
+info and apply a subset of that data as tags to resources.
+* Marketplace SC product tags - Get Marketplace SC product code and customer ID from subscriber Dynamo DB and
+apply them as tags.
+
+#### EC2 Only
+* AccessApprovedCaller tag - Generate the info to allow role access to an instance and apply it as a tag on the resource.
 
 ### Parameters
 

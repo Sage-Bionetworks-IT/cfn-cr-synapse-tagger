@@ -56,9 +56,10 @@ def create_or_update(event, context):
   bucket_tags = get_bucket_tags(bucket_name)
   synapse_owner_id = utils.get_synapse_owner_id(bucket_tags)
   synapse_tags = utils.get_synapse_tags(synapse_owner_id)
+  marketplace_tags = utils.get_marketplace_tags(synapse_owner_id)
   # put_bucket_tagging is a replace operation.  need to give it all
   # tags otherwise it will remove existing tags not in the list
-  all_tags = list(bucket_tags + synapse_tags)
+  all_tags = list(bucket_tags + synapse_tags + marketplace_tags)
   log.debug(f'Apply tags: {all_tags} to bucket {bucket_name}')
   apply_tags(bucket_name, all_tags)
 
