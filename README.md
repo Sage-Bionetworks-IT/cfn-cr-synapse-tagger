@@ -175,3 +175,4 @@ Steps to deploy from AWS console.
 3. Select application to install
 4. Enter Application settings
 5. Click Deploy
+test ci
