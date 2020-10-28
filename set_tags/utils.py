@@ -195,29 +195,34 @@ def get_access_approved_role_tag(tags):
 
 def get_marketplace_customer_id(synapse_id):
   '''Get the Service Catalog customer ID.
+  Assumes that there is a Dynamo DB with a table containing
+  a mapping of Synapse IDs to SC subscriber customer IDs
   :param synapse_id: synapse user id
   :return the customer ID of the service catalog subscriber, None if cannot find customer ID
   '''
-  marketplace_table_name = get_env_var_value('MARKETPLACE_ID_DYNAMO_TABLE_NAME')
+  ddb_marketplace_table_name = get_env_var_value('MARKETPLACE_ID_DYNAMO_TABLE_NAME')
+  ddb_customer_id_attribute = 'marketplaceCustomerId'
   customer_id = None
   client = get_dynamo_client()
-  try:
-    response = client.get_item(
-      Key={
-        'userId': {
-          'S': synapse_id,
-        }
-      },
-      TableName=marketplace_table_name,
-      ConsistentRead=True,
-      AttributesToGet=[
-        'marketplaceCustomerId'
-      ]
-    )
-    customer_id = response["Item"]["marketplaceCustomerId"]["S"]
-    log.debug(f'marketplace customer id: {customer_id}')
-  except Exception as e:
-    log.debug(e.response['Error']['Message'])
+  response = client.get_item(
+    Key={
+      'userId': {
+        'S': synapse_id,
+      }
+    },
+    TableName=ddb_marketplace_table_name,
+    ConsistentRead=True,
+    AttributesToGet=[
+      ddb_customer_id_attribute
+    ]
+  )
+
+  if ddb_customer_id_attribute not in response["Item"].keys():
+    log.info(f'no registration for marketplace customer id: {customer_id}')
+    return None
+
+  customer_id = response["Item"]["marketplaceCustomerId"]["S"]
+  log.debug(f'marketplace customer id: {customer_id}')
 
   return customer_id
 
