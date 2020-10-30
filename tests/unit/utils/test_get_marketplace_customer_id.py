@@ -5,7 +5,7 @@ from botocore.stub import Stubber
 from set_tags import utils
 
 
-class TestGetInstanceTags(unittest.TestCase):
+class TestGetMarketplaceCustomerId(unittest.TestCase):
 
   def test_registered_customer(self):
     ddb = utils.get_dynamo_client()
