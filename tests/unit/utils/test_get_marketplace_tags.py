@@ -21,7 +21,7 @@ class TestGetMarketplaceTags(unittest.TestCase):
         ]
         self.assertListEqual(result, expected)
 
-  def test_no_product_code_tag(self):
+  def test_no_customer_id_tag(self):
     ssm = boto3.client('ssm')
     with Stubber(ssm) as stubber, \
       patch('set_tags.utils.get_marketplace_customer_id') as customer_id_mock, \
@@ -34,7 +34,7 @@ class TestGetMarketplaceTags(unittest.TestCase):
         ]
         self.assertListEqual(result, expected)
 
-  def test_no_customer_id_tag(self):
+  def test_no_product_code_tag(self):
     ssm = boto3.client('ssm')
     with Stubber(ssm) as stubber, \
       patch('set_tags.utils.get_marketplace_customer_id') as customer_id_mock, \
