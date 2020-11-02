@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
 helper = CfnResource(
-  json_logging=False, log_level='DEBUG', boto_level='DEBUG')
+  json_logging=False, log_level='DEBUG', boto_level='CRITICAL')
 
 
 def get_bucket_name(event):
