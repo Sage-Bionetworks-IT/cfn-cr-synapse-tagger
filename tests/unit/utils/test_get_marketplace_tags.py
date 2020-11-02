@@ -16,8 +16,8 @@ class TestGetMarketplaceTags(unittest.TestCase):
         ssm_param_mock.return_value = "mkt-prod-1234"
         result = utils.get_marketplace_tags(1234567)
         expected = [
-          {'Key': 'synapse:marketplaceProductCode', 'Value': 'mkt-prod-1234'},
-          {'Key': 'synapse:marketplaceCustomerId', 'Value': 'mkt-cust-1234'}
+          {'Key': 'marketplace:productCode', 'Value': 'mkt-prod-1234'},
+          {'Key': 'marketplace:customerId', 'Value': 'mkt-cust-1234'}
         ]
         self.assertListEqual(result, expected)
 
@@ -30,7 +30,7 @@ class TestGetMarketplaceTags(unittest.TestCase):
         ssm_param_mock.return_value = "mkt-prod-1234"
         result = utils.get_marketplace_tags(1234567)
         expected = [
-          {'Key': 'synapse:marketplaceProductCode', 'Value': 'mkt-prod-1234'}
+          {'Key': 'marketplace:productCode', 'Value': 'mkt-prod-1234'}
         ]
         self.assertListEqual(result, expected)
 
@@ -43,7 +43,7 @@ class TestGetMarketplaceTags(unittest.TestCase):
         ssm_param_mock.return_value = ""
         result = utils.get_marketplace_tags(1234567)
         expected = [
-          {'Key': 'synapse:marketplaceCustomerId', 'Value': 'mkt-cust-1234'}
+          {'Key': 'marketplace:customerId', 'Value': 'mkt-cust-1234'}
         ]
         self.assertListEqual(result, expected)
 

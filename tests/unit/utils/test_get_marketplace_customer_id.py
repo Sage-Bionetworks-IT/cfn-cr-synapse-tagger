@@ -14,7 +14,7 @@ class TestGetMarketplaceCustomerId(unittest.TestCase):
       env_var_val.return_value = "SomeTable"
       response = {
           "Item": {
-              "marketplaceCustomerId": {
+              "MarketplaceCustomerId": {
                   "S": "mkt-cust-1234"
               }
           }
@@ -30,9 +30,7 @@ class TestGetMarketplaceCustomerId(unittest.TestCase):
     with Stubber(ddb) as stubber, \
       patch('set_tags.utils.get_env_var_value') as env_var_val:
       env_var_val.return_value = "SomeTable"
-      response = {
-          "Item": {}
-      }
+      response = {}
       stubber.add_response('get_item', response)
       utils.get_dynamo_client = MagicMock(return_value=ddb)
       synapse_id = "1234567"

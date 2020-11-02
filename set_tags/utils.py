@@ -5,6 +5,7 @@ import boto3
 import os
 import re
 
+MARKETPLACE_TAG_PREFIX = 'marketplace'
 SYNAPSE_TAG_PREFIX = 'synapse'
 SYNAPSE_USER_PROFILE_INCLUDES = [
   "ownerId", "firstName", "lastName", "userName", "company", "teamName",
@@ -201,12 +202,12 @@ def get_marketplace_customer_id(synapse_id):
   :return the customer ID of the service catalog subscriber, None if cannot find customer ID
   '''
   ddb_marketplace_table_name = get_env_var_value('MARKETPLACE_ID_DYNAMO_TABLE_NAME')
-  ddb_customer_id_attribute = 'marketplaceCustomerId'
+  ddb_customer_id_attribute = 'MarketplaceCustomerId'
   customer_id = None
   client = get_dynamo_client()
   response = client.get_item(
     Key={
-      'userId': {
+      'SynapseUserId': {
         'S': synapse_id,
       }
     },
@@ -217,12 +218,11 @@ def get_marketplace_customer_id(synapse_id):
     ]
   )
 
-  if ddb_customer_id_attribute not in response["Item"].keys():
-    log.info(f'no registration for marketplace customer id: {customer_id}')
-    return None
-
-  customer_id = response["Item"]["marketplaceCustomerId"]["S"]
-  log.debug(f'marketplace customer id: {customer_id}')
+  if "Item" in response.keys():
+    customer_id = response["Item"][ddb_customer_id_attribute]["S"]
+    log.debug(f'marketplace customer id: {customer_id}')
+  else:
+    log.info(f'cannot find registration for synapse user: {synapse_id}')
 
   return customer_id
 
@@ -235,11 +235,11 @@ def get_marketplace_tags(synapse_id):
 
   marketplace_product_code_sc = get_ssm_parameter("MarketplaceProductCodeSC")
   if marketplace_product_code_sc:
-    tags.append({'Key': f'{SYNAPSE_TAG_PREFIX}:marketplaceProductCode', 'Value': marketplace_product_code_sc})
+    tags.append({'Key': f'{MARKETPLACE_TAG_PREFIX}:productCode', 'Value': marketplace_product_code_sc})
 
   marketplace_customer_id = get_marketplace_customer_id(synapse_id)
   if marketplace_customer_id:
-    tags.append({'Key': f'{SYNAPSE_TAG_PREFIX}:marketplaceCustomerId', 'Value': marketplace_customer_id})
+    tags.append({'Key': f'{MARKETPLACE_TAG_PREFIX}:customerId', 'Value': marketplace_customer_id})
 
   log.debug(f'Marketplace SC product code tags: {tags}')
   return tags
