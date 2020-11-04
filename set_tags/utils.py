@@ -5,6 +5,7 @@ import boto3
 import os
 import re
 
+MARKETPLACE_TAG_PREFIX = 'marketplace'
 SYNAPSE_TAG_PREFIX = 'synapse'
 SYNAPSE_USER_PROFILE_INCLUDES = [
   "ownerId", "firstName", "lastName", "userName", "company", "teamName",
@@ -25,8 +26,15 @@ def get_ec2_client():
 def get_iam_client():
   return boto3.client('iam')
 
+def get_dynamo_client():
+  return boto3.client('dynamodb')
+
 def get_synapse_client():
   return synapseclient.Synapse()
+
+def get_env_var_value(env_var):
+  '''Get the value of an environment variable'''
+  return os.getenv(env_var)
 
 def get_synapse_owner_id(tags):
   '''Find the value of the principal ARN among the resource tags. The principal
@@ -58,7 +66,7 @@ def get_ssm_parameter(name):
 
 def get_synapse_team_ids():
   '''Return the list of IDs of teams through which a user can access service catalog'''
-  TeamToRoleArnMap = os.getenv('TEAM_TO_ROLE_ARN_MAP_PARAM_NAME')
+  TeamToRoleArnMap = get_env_var_value('TEAM_TO_ROLE_ARN_MAP_PARAM_NAME')
   ssm_param = get_ssm_parameter(TeamToRoleArnMap)
   team_to_role_arn_map = json.loads(ssm_param["Parameter"]["Value"])
   log.debug(f'/service-catalog/TeamToRoleArnMap value: {team_to_role_arn_map}')
@@ -185,3 +193,53 @@ def get_access_approved_role_tag(tags):
       return access_approved_role_tag
   else:
     raise ValueError(f'Expected to find {PRINCIPAL_ARN_TAG_KEY} in {tags}')
+
+def get_marketplace_customer_id(synapse_id):
+  '''Get the Service Catalog customer ID.
+  Assumes that there is a Dynamo DB with a table containing
+  a mapping of Synapse IDs to SC subscriber customer IDs
+  :param synapse_id: synapse user id
+  :return the customer ID of the service catalog subscriber, None if cannot find customer ID
+  '''
+  ddb_marketplace_table_name = get_env_var_value('MARKETPLACE_ID_DYNAMO_TABLE_NAME')
+  ddb_customer_id_attribute = 'MarketplaceCustomerId'
+  customer_id = None
+  client = get_dynamo_client()
+  response = client.get_item(
+    Key={
+      'SynapseUserId': {
+        'S': synapse_id,
+      }
+    },
+    TableName=ddb_marketplace_table_name,
+    ConsistentRead=True,
+    AttributesToGet=[
+      ddb_customer_id_attribute
+    ]
+  )
+
+  if "Item" in response.keys():
+    customer_id = response["Item"][ddb_customer_id_attribute]["S"]
+    log.debug(f'marketplace customer id: {customer_id}')
+  else:
+    log.info(f'cannot find registration for synapse user: {synapse_id}')
+
+  return customer_id
+
+def get_marketplace_tags(synapse_id):
+  '''Get the AWS Marketplace tags
+  :param synapse_id: synapse user id
+  :return a dict containing the marketplace SC product tags
+  '''
+  tags = []
+
+  marketplace_product_code_sc = get_ssm_parameter("MarketplaceProductCodeSC")
+  if marketplace_product_code_sc:
+    tags.append({'Key': f'{MARKETPLACE_TAG_PREFIX}:productCode', 'Value': marketplace_product_code_sc})
+
+  marketplace_customer_id = get_marketplace_customer_id(synapse_id)
+  if marketplace_customer_id:
+    tags.append({'Key': f'{MARKETPLACE_TAG_PREFIX}:customerId', 'Value': marketplace_customer_id})
+
+  log.debug(f'Marketplace SC product code tags: {tags}')
+  return tags

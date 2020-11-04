@@ -40,6 +40,8 @@ Resources:
       Environment:
         Variables:
           TEAM_TO_ROLE_ARN_MAP_PARAM_NAME: !Ref TeamToRoleArnMapParamName
+          MARKETPLACE_ID_DYNAMO_TABLE_NAME: !ImportValue
+            'Fn::Sub': '${AWS::Region}-marketplace-dynamo-MarketplaceDynamoDBTable'
 
   SetBucketTagsFunctionRole:
     Type: AWS::IAM::Role
@@ -57,6 +59,7 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - !Ref BucketTagPolicy
         - !Ref SsmManagedPolicy
+        - !Ref DynamoDbManagedPolicy
 
   BucketTagPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -80,6 +83,8 @@ Resources:
       Environment:
         Variables:
           TEAM_TO_ROLE_ARN_MAP_PARAM_NAME: !Ref TeamToRoleArnMapParamName
+          MARKETPLACE_ID_DYNAMO_TABLE_NAME: !ImportValue
+            'Fn::Sub': '${AWS::Region}-marketplace-dynamo-MarketplaceDynamoDBTable'
 
   SetInstanceTagsFunctionRole:
     Type: AWS::IAM::Role
@@ -97,6 +102,7 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - !Ref InstanceTagPolicy
         - !Ref SsmManagedPolicy
+        - !Ref DynamoDbManagedPolicy
 
   InstanceTagPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -125,6 +131,21 @@ Resources:
               - 'ssm:*'
             Effect: Allow
             Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${TeamToRoleArnMapParamName}'
+
+  DynamoDbManagedPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: DynamoDbAccess
+            Action:
+              - 'dynamodb:*Get*'
+              - 'dynamodb:*List*'
+            Effect: Allow
+            Resource: !ImportValue
+              'Fn::Sub': '${AWS::Region}-marketplace-dynamo-MarketplaceDynamoDBTableArn'
+
 Outputs:
   SetBucketTagsFunctionName:
     Value: !Ref SetBucketTagsFunction

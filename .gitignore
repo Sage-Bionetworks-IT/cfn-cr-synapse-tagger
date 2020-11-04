@@ -133,3 +133,6 @@ dmypy.json
 
 # temp
 temp/
+
+# MAC
+.DS_Store
