@@ -44,8 +44,8 @@ apply them as tags.
 
 This custom resource assumes the existence of the following SSM parameters:
 
-* `/service-catalog/TeamToRoleArnMap` - to determine the synapse team ID tag
-* `/service-catalog/MarketplaceProductCodeSC` - to determine the service catalog AWS Marketplace product code
+* `/service-catalog/TeamToRoleArnMap` - used to determine and apply the Synapse team tag
+* `/service-catalog/MarketplaceProductCodeSC` - used to apply the service catalog AWS Marketplace product code tag
 
 The specification for these parameters are defined by the
 [synapse login app](https://github.com/Sage-Bionetworks/synapse-login-scipool#configurations).
