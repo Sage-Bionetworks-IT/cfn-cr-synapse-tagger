@@ -69,7 +69,7 @@ def get_synapse_team_ids():
   TeamToRoleArnMap = get_env_var_value('TEAM_TO_ROLE_ARN_MAP_PARAM_NAME')
   ssm_param = get_ssm_parameter(TeamToRoleArnMap)
   team_to_role_arn_map = json.loads(ssm_param["Parameter"]["Value"])
-  log.debug(f'{TeamToRoleArnMap} value: {team_to_role_arn_map}')
+  log.debug(f'ssm param: {TeamToRoleArnMap} = {team_to_role_arn_map}')
   team_ids = []
   for item in team_to_role_arn_map:
     team_ids.append(item["teamId"])
@@ -234,8 +234,9 @@ def get_marketplace_tags(synapse_id):
   tags = []
 
   ssm_param_marketplace_product_code = get_env_var_value('MARKETPLACE_PRODUCT_CODE_SC_PARAM_NAME')
-  marketplace_product_code_sc = get_ssm_parameter(ssm_param_marketplace_product_code)
-  log.debug(f'{ssm_param_marketplace_product_code} value: {marketplace_product_code_sc}')
+  ssm_param = get_ssm_parameter(ssm_param_marketplace_product_code)
+  marketplace_product_code_sc = ssm_param["Parameter"]["Value"]
+  log.debug(f'ssm param: {ssm_param_marketplace_product_code} = {marketplace_product_code_sc}')
   if marketplace_product_code_sc:
     tags.append({'Key': f'{MARKETPLACE_TAG_PREFIX}:productCode', 'Value': marketplace_product_code_sc})
 
