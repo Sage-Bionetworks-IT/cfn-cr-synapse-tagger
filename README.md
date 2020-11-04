@@ -131,11 +131,11 @@ which requires permissions to upload to Sage
 `essentials-awss3lambdaartifactsbucket-x29ftznj6pqw` buckets.
 
 ```shell script
-sam package --template-file template.yaml \
+sam package --template-file .aws-sam/build/template.yaml \
   --s3-bucket essentials-awss3lambdaartifactsbucket-x29ftznj6pqw \
   --output-template-file .aws-sam/build/cfn-cr-synapse-tagger.yaml
 
-aws s3 cp .aws-sam/build/cfn-cr-synapse-tagger.yaml s3://bootstrap-awss3cloudformationbucket-19qromfd235z9/cfn-cr-synapse-tagger/master
+aws s3 cp .aws-sam/build/cfn-cr-synapse-tagger.yaml s3://bootstrap-awss3cloudformationbucket-19qromfd235z9/cfn-cr-synapse-tagger/master/
 ```
 
 ## Publish Lambda
