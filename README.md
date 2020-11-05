@@ -42,9 +42,13 @@ apply them as tags.
 
 ### Parameters
 
-To determine a team tag this custom resource assumes that there is a `/service-catalog/TeamToRoleArnMap`
-parameter in the AWS SSM parameter store.  The specification for that parameter is defined by the
-[synapse login app](https://github.com/Sage-Bionetworks/synapse-login-scipool#team-to-role-map).
+This custom resource assumes the existence of the following SSM parameters:
+
+* `/service-catalog/TeamToRoleArnMap` - used to determine and apply the Synapse team tag
+* `/service-catalog/MarketplaceProductCodeSC` - used to apply the service catalog AWS Marketplace product code tag
+
+The specification for these parameters are defined by the
+[synapse login app](https://github.com/Sage-Bionetworks/synapse-login-scipool#configurations).
 
 ## Use in a Cloudformation Template
 
@@ -127,11 +131,11 @@ which requires permissions to upload to Sage
 `essentials-awss3lambdaartifactsbucket-x29ftznj6pqw` buckets.
 
 ```shell script
-sam package --template-file template.yaml \
+sam package --template-file .aws-sam/build/template.yaml \
   --s3-bucket essentials-awss3lambdaartifactsbucket-x29ftznj6pqw \
   --output-template-file .aws-sam/build/cfn-cr-synapse-tagger.yaml
 
-aws s3 cp .aws-sam/build/cfn-cr-synapse-tagger.yaml s3://bootstrap-awss3cloudformationbucket-19qromfd235z9/cfn-cr-synapse-tagger/master
+aws s3 cp .aws-sam/build/cfn-cr-synapse-tagger.yaml s3://bootstrap-awss3cloudformationbucket-19qromfd235z9/cfn-cr-synapse-tagger/master/
 ```
 
 ## Publish Lambda
@@ -165,6 +169,7 @@ template_path: "remote/cfn-cr-synapse-tagger.yaml"
 stack_name: "cfn-cr-synapse-tagger"
 parameters:
   TeamToRoleArnMapParamName: "/service-catalog/TeamToRoleArnMap"
+  MarketplaceProductCodeSCParamName: "/service-catalog/MarketplaceProductCodeSC"
 hooks:
   before_launch:
     - !cmd "curl https://s3.amazonaws.com/essentials-awss3lambdaartifactsbucket-x29ftznj6pqw/it-lambda-set-bucket-tags/master/cfn-cr-synapse-tagger.yaml --create-dirs -o templates/remote/cfn-cr-synapse-tagger.yaml"
