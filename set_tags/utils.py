@@ -33,8 +33,15 @@ def get_synapse_client():
   return synapseclient.Synapse()
 
 def get_env_var_value(env_var):
-  '''Get the value of an environment variable'''
-  return os.getenv(env_var)
+  '''Get the value of an environment variable
+  :param env_var: the environment variable
+  :returns: the environment variable's value, None if env var is not found
+  '''
+  value = os.getenv(env_var)
+  if not value:
+    log.warning(f'cannot get envirooment variable: {env_var}')
+
+  return value
 
 def get_synapse_owner_id(tags):
   '''Find the value of the principal ARN among the resource tags. The principal
@@ -66,13 +73,14 @@ def get_ssm_parameter(name):
 
 def get_synapse_team_ids():
   '''Return the list of IDs of teams through which a user can access service catalog'''
-  TeamToRoleArnMap = get_env_var_value('TEAM_TO_ROLE_ARN_MAP_PARAM_NAME')
-  ssm_param = get_ssm_parameter(TeamToRoleArnMap)
-  team_to_role_arn_map = json.loads(ssm_param["Parameter"]["Value"])
-  log.debug(f'ssm param: {TeamToRoleArnMap} = {team_to_role_arn_map}')
   team_ids = []
-  for item in team_to_role_arn_map:
-    team_ids.append(item["teamId"])
+  TeamToRoleArnMap = get_env_var_value('TEAM_TO_ROLE_ARN_MAP_PARAM_NAME')
+  if TeamToRoleArnMap:
+    ssm_param = get_ssm_parameter(TeamToRoleArnMap)
+    team_to_role_arn_map = json.loads(ssm_param["Parameter"]["Value"])
+    log.debug(f'ssm param: {TeamToRoleArnMap} = {team_to_role_arn_map}')
+    for item in team_to_role_arn_map:
+      team_ids.append(item["teamId"])
 
   log.debug(f'Synapse team IDs: {team_ids}')
   return team_ids
@@ -201,28 +209,29 @@ def get_marketplace_customer_id(synapse_id):
   :param synapse_id: synapse user id
   :return the customer ID of the service catalog subscriber, None if cannot find customer ID
   '''
-  ddb_marketplace_table_name = get_env_var_value('MARKETPLACE_ID_DYNAMO_TABLE_NAME')
-  ddb_customer_id_attribute = 'MarketplaceCustomerId'
   customer_id = None
-  client = get_dynamo_client()
-  response = client.get_item(
-    Key={
-      'SynapseUserId': {
-        'S': synapse_id,
-      }
-    },
-    TableName=ddb_marketplace_table_name,
-    ConsistentRead=True,
-    AttributesToGet=[
-      ddb_customer_id_attribute
-    ]
-  )
+  ddb_marketplace_table_name = get_env_var_value('MARKETPLACE_ID_DYNAMO_TABLE_NAME')
+  if ddb_marketplace_table_name:
+    ddb_customer_id_attribute = 'MarketplaceCustomerId'
+    client = get_dynamo_client()
+    response = client.get_item(
+      Key={
+        'SynapseUserId': {
+          'S': synapse_id,
+        }
+      },
+      TableName=ddb_marketplace_table_name,
+      ConsistentRead=True,
+      AttributesToGet=[
+        ddb_customer_id_attribute
+      ]
+    )
 
-  if "Item" in response.keys():
-    customer_id = response["Item"][ddb_customer_id_attribute]["S"]
-    log.debug(f'marketplace customer id: {customer_id}')
-  else:
-    log.info(f'cannot find registration for synapse user: {synapse_id}')
+    if "Item" in response.keys():
+      customer_id = response["Item"][ddb_customer_id_attribute]["S"]
+      log.debug(f'marketplace customer id: {customer_id}')
+    else:
+      log.info(f'cannot find registration for synapse user: {synapse_id}')
 
   return customer_id
 
@@ -234,15 +243,16 @@ def get_marketplace_tags(synapse_id):
   tags = []
 
   ssm_param_marketplace_product_code = get_env_var_value('MARKETPLACE_PRODUCT_CODE_SC_PARAM_NAME')
-  ssm_param = get_ssm_parameter(ssm_param_marketplace_product_code)
-  marketplace_product_code_sc = ssm_param["Parameter"]["Value"]
-  log.debug(f'ssm param: {ssm_param_marketplace_product_code} = {marketplace_product_code_sc}')
-  if marketplace_product_code_sc:
-    tags.append({'Key': f'{MARKETPLACE_TAG_PREFIX}:productCode', 'Value': marketplace_product_code_sc})
+  if ssm_param_marketplace_product_code:
+    ssm_param = get_ssm_parameter(ssm_param_marketplace_product_code)
+    marketplace_product_code_sc = ssm_param["Parameter"]["Value"]
+    log.debug(f'ssm param: {ssm_param_marketplace_product_code} = {marketplace_product_code_sc}')
+    if marketplace_product_code_sc:
+      tags.append({'Key': f'{MARKETPLACE_TAG_PREFIX}:productCode', 'Value': marketplace_product_code_sc})
 
-  marketplace_customer_id = get_marketplace_customer_id(synapse_id)
-  if marketplace_customer_id:
-    tags.append({'Key': f'{MARKETPLACE_TAG_PREFIX}:customerId', 'Value': marketplace_customer_id})
+    marketplace_customer_id = get_marketplace_customer_id(synapse_id)
+    if marketplace_customer_id:
+      tags.append({'Key': f'{MARKETPLACE_TAG_PREFIX}:customerId', 'Value': marketplace_customer_id})
 
   log.debug(f'Marketplace SC product code tags: {tags}')
   return tags
