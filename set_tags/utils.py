@@ -39,7 +39,7 @@ def get_env_var_value(env_var):
   '''
   value = os.getenv(env_var)
   if not value:
-    log.warning(f'cannot get envirooment variable: {env_var}')
+    log.warning(f'cannot get environment variable: {env_var}')
 
   return value
 
