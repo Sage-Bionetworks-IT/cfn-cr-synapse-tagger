@@ -106,3 +106,12 @@ class TestGetMarketplaceTags(unittest.TestCase):
         result = utils.get_marketplace_tags(1234567)
         expected = []
         self.assertListEqual(result, expected)
+
+  def test_no_ssm_param_marketplace_product_code_sc(self):
+    ddb = utils.get_dynamo_client()
+    with Stubber(ddb) as stubber, \
+      patch('set_tags.utils.get_ssm_parameter') as get_ssm_param_mock:
+        get_ssm_param_mock.return_value = None
+        result = utils.get_marketplace_tags(1234567)
+        expected = []
+        self.assertListEqual(result, expected)

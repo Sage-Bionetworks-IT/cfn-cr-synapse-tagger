@@ -39,3 +39,12 @@ class TestGetSynapseTeamIds(unittest.TestCase):
         result = utils.get_synapse_team_ids()
         expected = []
         self.assertListEqual(result, expected)
+
+  def test_no_ssm_param_role_arn_map(self):
+    ssm = boto3.client('ssm')
+    with Stubber(ssm) as stubber, \
+      patch('set_tags.utils.get_ssm_parameter') as get_ssm_param_mock:
+        get_ssm_param_mock.return_value = None
+        result = utils.get_synapse_team_ids()
+        expected = []
+        self.assertListEqual(result, expected)

@@ -2,6 +2,7 @@ import json
 import logging
 import synapseclient
 import boto3
+import botocore
 import os
 import re
 
@@ -65,10 +66,19 @@ def get_synapse_user_profile(synapse_id):
   return user_profile
 
 def get_ssm_parameter(name):
-  '''Get an parameter from the SSM parameter store'''
+  '''
+  Get a parameter from the SSM parameter store
+  :param name: the parameter name
+  :return: a parameter dict, None if the parameter name is not found
+  '''
   client = boto3.client('ssm')
-  parameter = client.get_parameter(Name=name)
-  log.debug(f'Synapse ssm parameter: {parameter}')
+  parameter = None
+  try:
+    parameter = client.get_parameter(Name=name)
+    log.debug(f'SSM parameter value: {parameter}')
+  except botocore.exceptions.ParameterNotFound as e:
+    log.warning(f'Could not find SSM parameter {name}')
+
   return parameter
 
 def get_synapse_team_ids():
@@ -77,10 +87,11 @@ def get_synapse_team_ids():
   TeamToRoleArnMap = get_env_var_value('TEAM_TO_ROLE_ARN_MAP_PARAM_NAME')
   if TeamToRoleArnMap:
     ssm_param = get_ssm_parameter(TeamToRoleArnMap)
-    team_to_role_arn_map = json.loads(ssm_param["Parameter"]["Value"])
-    log.debug(f'ssm param: {TeamToRoleArnMap} = {team_to_role_arn_map}')
-    for item in team_to_role_arn_map:
-      team_ids.append(item["teamId"])
+    if ssm_param:
+      team_to_role_arn_map = json.loads(ssm_param["Parameter"]["Value"])
+      log.debug(f'ssm param: {TeamToRoleArnMap} = {team_to_role_arn_map}')
+      for item in team_to_role_arn_map:
+        team_ids.append(item["teamId"])
 
   log.debug(f'Synapse team IDs: {team_ids}')
   return team_ids
@@ -245,14 +256,15 @@ def get_marketplace_tags(synapse_id):
   ssm_param_marketplace_product_code = get_env_var_value('MARKETPLACE_PRODUCT_CODE_SC_PARAM_NAME')
   if ssm_param_marketplace_product_code:
     ssm_param = get_ssm_parameter(ssm_param_marketplace_product_code)
-    marketplace_product_code_sc = ssm_param["Parameter"]["Value"]
-    log.debug(f'ssm param: {ssm_param_marketplace_product_code} = {marketplace_product_code_sc}')
-    if marketplace_product_code_sc:
-      tags.append({'Key': f'{MARKETPLACE_TAG_PREFIX}:productCode', 'Value': marketplace_product_code_sc})
+    if ssm_param:
+      marketplace_product_code_sc = ssm_param["Parameter"]["Value"]
+      log.debug(f'ssm param: {ssm_param_marketplace_product_code} = {marketplace_product_code_sc}')
+      if marketplace_product_code_sc:
+        tags.append({'Key': f'{MARKETPLACE_TAG_PREFIX}:productCode', 'Value': marketplace_product_code_sc})
 
-    marketplace_customer_id = get_marketplace_customer_id(synapse_id)
-    if marketplace_customer_id:
-      tags.append({'Key': f'{MARKETPLACE_TAG_PREFIX}:customerId', 'Value': marketplace_customer_id})
+      marketplace_customer_id = get_marketplace_customer_id(synapse_id)
+      if marketplace_customer_id:
+        tags.append({'Key': f'{MARKETPLACE_TAG_PREFIX}:customerId', 'Value': marketplace_customer_id})
 
   log.debug(f'Marketplace SC product code tags: {tags}')
   return tags
