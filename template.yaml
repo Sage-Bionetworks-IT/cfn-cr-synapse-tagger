@@ -15,8 +15,8 @@ Metadata:
     ReadmeUrl: "README.md"
     Labels: ["serverless", "custom-resource", "cloudformation", "synapse", "tags"]
     HomePageUrl: "https://github.com/Sage-Bionetworks-IT/cfn-cr-synapse-tagger"
-    SemanticVersion: "0.0.7"
-    SourceCodeUrl: "https://github.com/Sage-Bionetworks-IT/cfn-cr-synapse-tagger/tree/0.0.7"
+    SemanticVersion: "0.0.8"
+    SourceCodeUrl: "https://github.com/Sage-Bionetworks-IT/cfn-cr-synapse-tagger/tree/0.0.8"
 
 Parameters:
   TeamToRoleArnMapParamName:
