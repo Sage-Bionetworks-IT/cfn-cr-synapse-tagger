@@ -23,8 +23,19 @@ class TestGetSynapseTeamIds(unittest.TestCase):
   def test_happy_path(self):
     ssm = boto3.client('ssm')
     with Stubber(ssm) as stubber, \
+      patch('set_tags.utils.get_env_var_value') as env_var_mock, \
       patch('set_tags.utils.get_ssm_parameter') as param_mock:
+        env_var_mock.return_value = "some-value"
         param_mock.return_value = MOCK_GET_PARAMETER_RESPONSE
         result = utils.get_synapse_team_ids()
         expected = ["1111111","2222222"]
+        self.assertListEqual(result, expected)
+
+  def test_no_env_var_team_to_role_arn_map_param_name(self):
+    ssm = boto3.client('ssm')
+    with Stubber(ssm) as stubber, \
+      patch('set_tags.utils.get_env_var_value') as env_var_mock:
+        env_var_mock.return_value = None
+        result = utils.get_synapse_team_ids()
+        expected = []
         self.assertListEqual(result, expected)

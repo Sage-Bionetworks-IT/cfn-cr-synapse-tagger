@@ -36,3 +36,13 @@ class TestGetMarketplaceCustomerId(unittest.TestCase):
       synapse_id = "1234567"
       result = utils.get_marketplace_customer_id(synapse_id)
       self.assertEqual(None, result)
+
+  def test_no_env_var_marketplace_id_dynamo_table_name(self):
+    ddb = utils.get_dynamo_client()
+    with Stubber(ddb) as stubber, \
+      patch('set_tags.utils.get_env_var_value') as env_var_mock:
+        env_var_mock.return_value = None
+        synapse_id = "1234567"
+        result = utils.get_marketplace_customer_id(synapse_id)
+        expected = None
+        self.assertEqual(result, expected)
