@@ -6,6 +6,8 @@ import botocore
 import os
 import re
 
+from botocore.exceptions import ClientError
+
 MARKETPLACE_TAG_PREFIX = 'marketplace'
 SYNAPSE_TAG_PREFIX = 'synapse'
 SYNAPSE_USER_PROFILE_INCLUDES = [
@@ -76,8 +78,11 @@ def get_ssm_parameter(name):
   try:
     parameter = client.get_parameter(Name=name)
     log.debug(f'SSM parameter value: {parameter}')
-  except botocore.exceptions.ParameterNotFound as e:
-    log.warning(f'Could not find SSM parameter {name}')
+  except ClientError as e:
+    if e.response['Error']['Code'] == "ParameterNotFound":
+      log.warning(f'Could not find SSM parameter {name}')
+    else:
+      raise(e)
 
   return parameter
 
