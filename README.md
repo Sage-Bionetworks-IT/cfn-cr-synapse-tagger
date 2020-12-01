@@ -45,7 +45,6 @@ apply them as tags.
 This custom resource assumes the existence of the following SSM parameters:
 
 * `/service-catalog/TeamToRoleArnMap` - used to determine and apply the Synapse team tag
-* `/service-catalog/MarketplaceProductCodeSC` - used to apply the service catalog AWS Marketplace product code tag
 
 The specification for these parameters are defined by the
 [synapse login app](https://github.com/Sage-Bionetworks/synapse-login-scipool#configurations).
@@ -169,7 +168,6 @@ template_path: "remote/cfn-cr-synapse-tagger.yaml"
 stack_name: "cfn-cr-synapse-tagger"
 parameters:
   TeamToRoleArnMapParamName: "/service-catalog/TeamToRoleArnMap"
-  MarketplaceProductCodeSCParamName: "/service-catalog/MarketplaceProductCodeSC"
 hooks:
   before_launch:
     - !cmd "curl https://s3.amazonaws.com/essentials-awss3lambdaartifactsbucket-x29ftznj6pqw/it-lambda-set-bucket-tags/master/cfn-cr-synapse-tagger.yaml --create-dirs -o templates/remote/cfn-cr-synapse-tagger.yaml"

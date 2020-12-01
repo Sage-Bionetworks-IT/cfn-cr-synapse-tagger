@@ -23,10 +23,6 @@ Parameters:
     Description: 'The TeamToRoleArnMap parameter name in the SSM parameter store'
     Type: String
     Default: '/service-catalog/TeamToRoleArnMap'
-  MarketplaceProductCodeSCParamName:
-    Description: 'The MarketplaceProductCodeSC parameter name in the SSM parameter store'
-    Type: String
-    Default: '/service-catalog/MarketplaceProductCodeSC'
 
 Globals:
   Function:
@@ -44,7 +40,6 @@ Resources:
       Environment:
         Variables:
           TEAM_TO_ROLE_ARN_MAP_PARAM_NAME: !Ref TeamToRoleArnMapParamName
-          MARKETPLACE_PRODUCT_CODE_SC_PARAM_NAME: !Ref MarketplaceProductCodeSCParamName
           MARKETPLACE_ID_DYNAMO_TABLE_NAME: !ImportValue
             'Fn::Sub': '${AWS::Region}-marketplace-dynamo-MarketplaceDynamoDBTable'
 
@@ -88,7 +83,6 @@ Resources:
       Environment:
         Variables:
           TEAM_TO_ROLE_ARN_MAP_PARAM_NAME: !Ref TeamToRoleArnMapParamName
-          MARKETPLACE_PRODUCT_CODE_SC_PARAM_NAME: !Ref MarketplaceProductCodeSCParamName
           MARKETPLACE_ID_DYNAMO_TABLE_NAME: !ImportValue
             'Fn::Sub': '${AWS::Region}-marketplace-dynamo-MarketplaceDynamoDBTable'
 
@@ -138,7 +132,6 @@ Resources:
             Effect: Allow
             Resource:
               - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${TeamToRoleArnMapParamName}'
-              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${MarketplaceProductCodeSCParamName}'
 
   DynamoDbManagedPolicy:
     Type: AWS::IAM::ManagedPolicy
