@@ -218,17 +218,16 @@ def get_access_approved_role_tag(tags):
   else:
     raise ValueError(f'Expected to find {PRINCIPAL_ARN_TAG_KEY} in {tags}')
 
-def get_marketplace_customer_id(synapse_id):
-  '''Get the Service Catalog customer ID.
-  Assumes that there is a Dynamo DB with a table containing
-  a mapping of Synapse IDs to SC subscriber customer IDs
+def get_marketplace_customer_info(synapse_id):
+  '''Get the Service Catalog customer info.
+  Assumes that there is a Dynamo DB with a table containing a mapping of Synapse IDs
+  to SC subscriber customer IDs
   :param synapse_id: synapse user id
-  :return the customer ID of the service catalog subscriber, None if cannot find customer ID
+  :return a dict containing the customer info
   '''
-  customer_id = None
+  customer_info = {}
   ddb_marketplace_table_name = get_env_var_value('MARKETPLACE_ID_DYNAMO_TABLE_NAME')
   if ddb_marketplace_table_name:
-    ddb_customer_id_attribute = 'MarketplaceCustomerId'
     client = get_dynamo_client()
     response = client.get_item(
       Key={
@@ -238,68 +237,39 @@ def get_marketplace_customer_id(synapse_id):
       },
       TableName=ddb_marketplace_table_name,
       ConsistentRead=True,
-      AttributesToGet=[
-        ddb_customer_id_attribute
-      ]
     )
 
     if "Item" in response.keys():
-      customer_id = response["Item"][ddb_customer_id_attribute]["S"]
-      log.debug(f'marketplace customer id: {customer_id}')
+      customer_attribute = response['Item']
+      for key, value in customer_attribute.items():
+        customer_info[key] = value['S']
     else:
       log.info(f'cannot find registration for synapse user: {synapse_id}')
 
-  return customer_id
-
-def get_marketplace_product_code(synapse_id):
-  '''Get the registered Service Catalog customer product code.
-  Assumes that there is a Dynamo DB with a table containing a mapping of Synapse
-  IDs to SC subscriber data
-  :param synapse_id: synapse user id
-  :return the Marketplace product code, None if cannot find customer ID
-  '''
-  product_code = None
-  ddb_marketplace_table_name = get_env_var_value('MARKETPLACE_ID_DYNAMO_TABLE_NAME')
-  if ddb_marketplace_table_name:
-    ddb_product_code_attribute = 'ProductCode'
-    client = get_dynamo_client()
-    response = client.get_item(
-      Key={
-        'SynapseUserId': {
-          'S': synapse_id,
-        }
-      },
-      TableName=ddb_marketplace_table_name,
-      ConsistentRead=True,
-      AttributesToGet=[
-        ddb_product_code_attribute
-      ]
-    )
-
-    if "Item" in response.keys():
-      product_code = response["Item"][ddb_product_code_attribute]["S"]
-    else:
-      log.info(f'cannot find registration for synapse user: {synapse_id}')
-
-  return product_code
-
+  log.debug(f'marketplace customer inf: {customer_info}')
+  return customer_info
 
 def get_marketplace_tags(synapse_id):
   '''Get the AWS Marketplace tags
   :param synapse_id: synapse user id
-  :return a dict containing the marketplace SC product tags
+  :return a list containing the marketplace SC product tags
   '''
   tags = []
 
-  marketplace_customer_id = get_marketplace_customer_id(synapse_id)
-  log.debug(f'marketplace customer ID: {marketplace_customer_id}')
-  if marketplace_customer_id:
-    tags.append({'Key': f'{MARKETPLACE_TAG_PREFIX}:customerId', 'Value': marketplace_customer_id})
-
-  marketplace_product_code = get_marketplace_product_code(synapse_id)
-  log.debug(f'marketplace product code: {marketplace_product_code}')
-  if marketplace_product_code:
-    tags.append({'Key': f'{MARKETPLACE_TAG_PREFIX}:productCode', 'Value': marketplace_product_code})
+  marketplace_customer_info = get_marketplace_customer_info(synapse_id)
+  if marketplace_customer_info:
+    tags.append(
+      {
+        'Key': f'{MARKETPLACE_TAG_PREFIX}:customerId',
+        'Value': marketplace_customer_info['MarketplaceCustomerId']
+      }
+    )
+    tags.append(
+      {
+        'Key': f'{MARKETPLACE_TAG_PREFIX}:productCode',
+        'Value': marketplace_customer_info['ProductCode']
+      }
+    )
 
   log.debug(f'Marketplace SC product code tags: {tags}')
   return tags
