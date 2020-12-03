@@ -1,7 +1,7 @@
 {
   "RequestType" : "Create",
   "RequestId" : "unique_id",
-  "ResponseURL" : "https://cloudformation-custom-resource-response-useast1.s3.amazonaws.com/arn:aws:cloudformation:us-east-1:237179673806:stack/cfn-cr-synapse-tagger/",
+  "ResponseURL" : "https://cloudformation-custom-resource-response-useast1.s3.amazonaws.com/arn:aws:cloudformation:us-east-1:237179673806:stack/cfn-cr-sc-tagger/",
   "ResourceType" : "Custom::S3BucketTagger",
   "LogicalResourceId" : "S3BucketTagger",
   "StackId" : "arn:aws:cloudformation:us-east-1:237179673806:stack/SC-237179673806-pp-h2q3pe4itf5sk/14a082d0-7e92-11ea-a356-120fbf0f0187",

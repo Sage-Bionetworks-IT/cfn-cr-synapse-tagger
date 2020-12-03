@@ -1,4 +1,4 @@
-# cfn-cr-synapse-tagger
+# cfn-cr-sc-tagger
 
 Cloudformation Custom Resource used to apply tags to resources provisioned using the
 Sage Service Catalog.
@@ -60,7 +60,7 @@ Create a custom resource in your cloudformation template. Here's an example:
     Type: Custom::SynapseTagger
     Properties:
       ServiceToken: !ImportValue
-        'Fn::Sub': '${AWS::Region}-cfn-cr-synapse-tagger-SetBucketTagsFunctionArn'
+        'Fn::Sub': '${AWS::Region}-cfn-cr-sc-tagger-SetBucketTagsFunctionArn'
       BucketName: !Ref MyBucket
 ```
 
@@ -79,7 +79,7 @@ Create a custom resource in your cloudformation template. Here's an example:
     Type: Custom::SynapseTagger
     Properties:
       ServiceToken: !ImportValue
-        'Fn::Sub': '${AWS::Region}-cfn-cr-synapse-tagger-SetInstanceTagsFunctionArn'
+        'Fn::Sub': '${AWS::Region}-cfn-cr-sc-tagger-SetInstanceTagsFunctionArn'
       InstanceId: !Ref MyEC2
 ```
 
@@ -133,9 +133,9 @@ which requires permissions to upload to Sage
 ```shell script
 sam package --template-file .aws-sam/build/template.yaml \
   --s3-bucket essentials-awss3lambdaartifactsbucket-x29ftznj6pqw \
-  --output-template-file .aws-sam/build/cfn-cr-synapse-tagger.yaml
+  --output-template-file .aws-sam/build/cfn-cr-sc-tagger.yaml
 
-aws s3 cp .aws-sam/build/cfn-cr-synapse-tagger.yaml s3://bootstrap-awss3cloudformationbucket-19qromfd235z9/cfn-cr-synapse-tagger/master/
+aws s3 cp .aws-sam/build/cfn-cr-sc-tagger.yaml s3://bootstrap-awss3cloudformationbucket-19qromfd235z9/cfn-cr-sc-tagger/master/
 ```
 
 ## Publish Lambda
@@ -145,7 +145,7 @@ Publishing the lambda makes it available in your AWS account.  It will be access
 the [serverless application repository](https://console.aws.amazon.com/serverlessrepo).
 
 ```shell script
-sam publish --template .aws-sam/build/cfn-cr-synapse-tagger.yaml
+sam publish --template .aws-sam/build/cfn-cr-sc-tagger.yaml
 ```
 
 ### Public access
@@ -163,21 +163,21 @@ aws serverlessrepo put-application-policy \
 ### Sceptre
 Create the following [sceptre](https://github.com/Sceptre/sceptre) file
 
-config/prod/cfn-cr-synapse-tagger.yaml
+config/prod/cfn-cr-sc-tagger.yaml
 ```yaml
-template_path: "remote/cfn-cr-synapse-tagger.yaml"
-stack_name: "cfn-cr-synapse-tagger"
+template_path: "remote/cfn-cr-sc-tagger.yaml"
+stack_name: "cfn-cr-sc-tagger"
 parameters:
   TeamToRoleArnMapParamName: "/service-catalog/TeamToRoleArnMap"
   MarketplaceProductCodeSCParamName: "/service-catalog/MarketplaceProductCodeSC"
 hooks:
   before_launch:
-    - !cmd "curl https://s3.amazonaws.com/essentials-awss3lambdaartifactsbucket-x29ftznj6pqw/it-lambda-set-bucket-tags/master/cfn-cr-synapse-tagger.yaml --create-dirs -o templates/remote/cfn-cr-synapse-tagger.yaml"
+    - !cmd "curl https://s3.amazonaws.com/essentials-awss3lambdaartifactsbucket-x29ftznj6pqw/it-lambda-set-bucket-tags/master/cfn-cr-sc-tagger.yaml --create-dirs -o templates/remote/cfn-cr-sc-tagger.yaml"
 ```
 
 Install the lambda using sceptre:
 ```bash script
-sceptre --var "profile=my-profile" --var "region=us-east-1" launch prod/cfn-cr-synapse-tagger
+sceptre --var "profile=my-profile" --var "region=us-east-1" launch prod/cfn-cr-sc-tagger
 ```
 
 ### AWS Console

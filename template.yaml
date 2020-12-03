@@ -5,7 +5,7 @@ Description: >-
 
 Metadata:
   AWS::ServerlessRepo::Application:
-    Name: "cfn-cr-synapse-tagger"
+    Name: "cfn-cr-sc-tagger"
     Description: >-
       A Cloudformation custom resource to apply Sage Bionetworks Synapse data to cloud resources
     Author: "Sage-Bionetworks"
@@ -14,9 +14,9 @@ Metadata:
     LicenseUrl: "LICENSE"
     ReadmeUrl: "README.md"
     Labels: ["serverless", "custom-resource", "cloudformation", "synapse", "tags"]
-    HomePageUrl: "https://github.com/Sage-Bionetworks-IT/cfn-cr-synapse-tagger"
+    HomePageUrl: "https://github.com/Sage-Bionetworks-IT/cfn-cr-sc-tagger"
     SemanticVersion: "0.0.10"
-    SourceCodeUrl: "https://github.com/Sage-Bionetworks-IT/cfn-cr-synapse-tagger/tree/0.0.10"
+    SourceCodeUrl: "https://github.com/Sage-Bionetworks-IT/cfn-cr-sc-tagger/tree/0.0.10"
 
 Parameters:
   TeamToRoleArnMapParamName:

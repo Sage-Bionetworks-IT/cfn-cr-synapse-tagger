@@ -1,13 +1,13 @@
 {
   "RequestType":"Create",
-  "ServiceToken":"arn:aws:lambda:us-east-1:465877038949:function:khai-cfn-cr-synapse-tagger-SetInstanceTagsFunction-P2RGCZEI3OW6",
+  "ServiceToken":"arn:aws:lambda:us-east-1:465877038949:function:khai-cfn-cr-sc-tagger-SetInstanceTagsFunction-P2RGCZEI3OW6",
   "ResponseURL":"https://cloudformation-custom-resource-response-useast1.s3.amazonaws.com/arn%3Aaws%3Acloudformation%3Aus-east-1%3A465877038949%3Astack/SC-465877038949-pp-qv7cvlggt75lo/1a69d180-fe76-11ea-9dd7-0ad52a854211%7CTagInstance%7Ccd91ab0e-88e6-4cfd-9a03-322420db1dd9?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20200924T150008Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIA6L7Q4OWTVZGMUJ7R%2F20200924%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=f08e5c8bb62340f0104253b460b0d4333d2af80d624b5accaf2dfdb464693a5b",
   "StackId":"arn:aws:cloudformation:us-east-1:465877038949:stack/SC-465877038949-pp-qv7cvlggt75lo/1a69d180-fe76-11ea-9dd7-0ad52a854211",
   "RequestId":"cd91ab0e-88e6-4cfd-9a03-322420db1dd9",
   "LogicalResourceId":"TagInstance",
   "ResourceType":"Custom::SynapseTagger",
   "ResourceProperties":{
-    "ServiceToken":"arn:aws:lambda:us-east-1:465877038949:function:khai-cfn-cr-synapse-tagger-SetInstanceTagsFunction-P2RGCZEI3OW6",
+    "ServiceToken":"arn:aws:lambda:us-east-1:465877038949:function:khai-cfn-cr-sc-tagger-SetInstanceTagsFunction-P2RGCZEI3OW6",
     "InstanceId":"i-0ed683a88587cdad8"
   }
 }
