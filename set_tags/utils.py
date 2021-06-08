@@ -8,7 +8,6 @@ import re
 
 from botocore.exceptions import ClientError
 
-MARKETPLACE_TAG_PREFIX = 'marketplace'
 SYNAPSE_TAG_PREFIX = 'synapse'
 SYNAPSE_USER_PROFILE_INCLUDES = [
   "ownerId", "firstName", "lastName", "userName", "company", "teamName",
@@ -28,9 +27,6 @@ def get_ec2_client():
 
 def get_iam_client():
   return boto3.client('iam')
-
-def get_dynamo_client():
-  return boto3.client('dynamodb')
 
 def get_synapse_client():
   return synapseclient.Synapse()
@@ -217,59 +213,3 @@ def get_access_approved_role_tag(tags):
       return access_approved_role_tag
   else:
     raise ValueError(f'Expected to find {PRINCIPAL_ARN_TAG_KEY} in {tags}')
-
-def get_marketplace_customer_info(synapse_id):
-  '''Get the Service Catalog customer info.
-  Assumes that there is a Dynamo DB with a table containing a mapping of Synapse IDs
-  to SC subscriber customer IDs
-  :param synapse_id: synapse user id
-  :return a dict containing the customer info
-  '''
-  customer_info = {}
-  ddb_marketplace_table_name = get_env_var_value('MARKETPLACE_ID_DYNAMO_TABLE_NAME')
-  if ddb_marketplace_table_name:
-    client = get_dynamo_client()
-    response = client.get_item(
-      Key={
-        'SynapseUserId': {
-          'S': synapse_id,
-        }
-      },
-      TableName=ddb_marketplace_table_name,
-      ConsistentRead=True,
-    )
-
-    if "Item" in response.keys():
-      customer_attribute = response['Item']
-      for key, value in customer_attribute.items():
-        customer_info[key] = value['S']
-    else:
-      log.info(f'cannot find registration for synapse user: {synapse_id}')
-
-  log.debug(f'marketplace customer inf: {customer_info}')
-  return customer_info
-
-def get_marketplace_tags(synapse_id):
-  '''Get the AWS Marketplace tags
-  :param synapse_id: synapse user id
-  :return a list containing the marketplace SC product tags
-  '''
-  tags = []
-
-  marketplace_customer_info = get_marketplace_customer_info(synapse_id)
-  if marketplace_customer_info:
-    tags.append(
-      {
-        'Key': f'{MARKETPLACE_TAG_PREFIX}:customerId',
-        'Value': marketplace_customer_info['MarketplaceCustomerId']
-      }
-    )
-    tags.append(
-      {
-        'Key': f'{MARKETPLACE_TAG_PREFIX}:productCode',
-        'Value': marketplace_customer_info['ProductCode']
-      }
-    )
-
-  log.debug(f'Marketplace SC product code tags: {tags}')
-  return tags

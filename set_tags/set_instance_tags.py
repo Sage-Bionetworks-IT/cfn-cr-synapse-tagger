@@ -83,8 +83,7 @@ def create_or_update(event, context):
   extra_tags.append(provisioned_product_name_tag)
   access_approved_role_tag = utils.get_access_approved_role_tag(instance_tags)
   extra_tags.append(access_approved_role_tag)
-  marketplace_tags = utils.get_marketplace_tags(synapse_owner_id)
-  all_tags = list(synapse_tags + extra_tags + marketplace_tags)
+  all_tags = list(synapse_tags + extra_tags)
 
   volume_ids = get_volume_ids(instance_id)
   log.debug(f'Apply tags: {all_tags} to volume {volume_ids}')
