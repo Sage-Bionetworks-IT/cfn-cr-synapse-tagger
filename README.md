@@ -34,8 +34,6 @@ them as additional tags on the provisioned resource.
 #### All Resources
 * Synapse tags - Retrieve the [Synapse userProfile](https://docs.synapse.org/rest/org/sagebionetworks/repo/model/UserProfile.html)
 info and apply a subset of that data as tags to resources.
-* Marketplace SC product tags - Get Marketplace SC product code and customer ID from subscriber Dynamo DB and
-apply them as tags.
 
 #### EC2 Only
 * AccessApprovedCaller tag - Generate the info to allow role access to an instance and apply it as a tag on the resource.
