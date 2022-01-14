@@ -83,6 +83,21 @@ Create a custom resource in your cloudformation template. Here's an example:
 The creation of the custom resource triggers the lambda, which pulls the current
 tags from `MyEC2` instance, derives new tags, and sets those on the instance.
 
+### Scheduled Jobs (Batch)
+
+Create a custom resource in your cloudformation template. Here's an example:
+```yaml
+  BatchTagger:
+    Type: Custom::SynapseTagger
+    Properties:
+      ServiceToken: !ImportValue
+        'Fn::Sub': '${AWS::Region}-cfn-cr-synapse-tagger-SetBatchTagsFunctionArn'
+      JobDefinitionArn: !Ref JobDefinition
+      JobQueueArn: !Ref JobQueue
+      ComputeEnvironmentArn: !Ref ComputeEnvironment
+      SchedulingPolicyArn: !Ref SchedulingPolicy
+```
+
 ## Development
 
 ### Contributions
@@ -162,13 +177,10 @@ Create the following [sceptre](https://github.com/Sceptre/sceptre) file
 
 config/prod/cfn-cr-synapse-tagger.yaml
 ```yaml
-template_path: "remote/cfn-cr-synapse-tagger.yaml"
+template:
+  type: http
+  url: "https://s3.amazonaws.com/essentials-awss3lambdaartifactsbucket-x29ftznj6pqw/it-lambda-set-bucket-tags/master/cfn-cr-synapse-tagger.yaml"
 stack_name: "cfn-cr-synapse-tagger"
-parameters:
-  TeamToRoleArnMapParamName: "/service-catalog/TeamToRoleArnMap"
-hooks:
-  before_launch:
-    - !cmd "curl https://s3.amazonaws.com/essentials-awss3lambdaartifactsbucket-x29ftznj6pqw/it-lambda-set-bucket-tags/master/cfn-cr-synapse-tagger.yaml --create-dirs -o templates/remote/cfn-cr-synapse-tagger.yaml"
 ```
 
 Install the lambda using sceptre:
