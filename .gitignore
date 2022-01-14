@@ -135,4 +135,7 @@ dmypy.json
 temp/
 
 # MAC
-.DS_Store
+.DS_Stor
+
+# aws sam
+.aws-sam/
