@@ -65,7 +65,7 @@ def get_synapse_owner_id(tags):
   'arn:aws:sts::111111111:assumed-role/ServiceCatalogEndusers/378505'
   :param tags: resource tags can take two forms
     * A list of dictionary of key/value pairs
-      i.e. tags:{'Key':'string', 'Value':'string'}
+      i.e. tags:[{'Key':'string', 'Value':'string'}]
     * A dictionary of key pairs
       i.e. tags:{'string':'string'}
   returns: the synapse user id (i.e. 378505)
@@ -73,7 +73,7 @@ def get_synapse_owner_id(tags):
   principal_arn_tag = 'aws:servicecatalog:provisioningPrincipalArn'
   synapse_owner_id = None
 
-  if isinstance(tags, list):  # tags:{'Key':'string', 'Value':'string'}
+  if isinstance(tags, list):  # tags:[{'Key':'string', 'Value':'string'}]
     for tag in tags:
       if tag.get('Key') == principal_arn_tag:
         principal_arn_value = tag.get('Value')
