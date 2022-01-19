@@ -25,6 +25,9 @@ def get_s3_client():
 def get_ec2_client():
   return boto3.client('ec2')
 
+def get_batch_client():
+  return boto3.client('batch')
+
 def get_iam_client():
   return boto3.client('iam')
 
@@ -55,6 +58,37 @@ def get_synapse_owner_id(tags):
       return synapse_owner_id
   else:
     raise ValueError(f'Expected to find {principal_arn_tag} in {tags}')
+
+def get_synapse_owner_id(tags):
+  '''Find the value of the principal ARN among the resource tags. The principal
+  ARN tag is applied by AWS and it's value should be in the following format
+  'arn:aws:sts::111111111:assumed-role/ServiceCatalogEndusers/378505'
+  :param tags: resource tags can take two forms
+    * A list of dictionary of key/value pairs
+      i.e. tags:[{'Key':'string', 'Value':'string'}]
+    * A dictionary of key pairs
+      i.e. tags:{'string':'string'}
+  returns: the synapse user id (i.e. 378505)
+  '''
+  principal_arn_tag = 'aws:servicecatalog:provisioningPrincipalArn'
+  synapse_owner_id = None
+
+  if isinstance(tags, list):  # tags:[{'Key':'string', 'Value':'string'}]
+    for tag in tags:
+      if tag.get('Key') == principal_arn_tag:
+        principal_arn_value = tag.get('Value')
+        synapse_owner_id = principal_arn_value.split('/')[-1]
+  if isinstance(tags, dict):  # tags:{'string':'string'}
+    if principal_arn_tag in tags:
+        principal_arn_value = tags.get(principal_arn_tag)
+        synapse_owner_id = principal_arn_value.split('/')[-1]
+
+  if synapse_owner_id is None:
+      raise ValueError(f'{principal_arn_tag} not found in tags: {tags}')
+
+  return synapse_owner_id
+
+
 
 def get_synapse_user_profile(synapse_id):
   '''Get synapse user profile data'''
@@ -156,7 +190,12 @@ def get_synapse_user_team_tags(synapse_id, synapse_team_ids):
   return tags
 
 def get_synapse_tags(synapse_id):
-  '''Derive synapse tags to apply to SC resources'''
+  '''
+  Derive synapse tags to apply to SC resources
+  Returns a list of key/value pairs of tags
+  :param synapse_id: the synapse user id
+  :return A list containing a dictionary of key/value pairs representing tags
+  '''
 
   user_profile = get_synapse_user_profile(synapse_id)
   synapse_user_tags = get_synapse_user_profile_tags(user_profile)

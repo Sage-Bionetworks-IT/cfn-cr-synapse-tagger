@@ -31,6 +31,47 @@ Globals:
     Handler: app.handler
 
 Resources:
+  SetBatchTagsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: set_tags/set_batch_tags.handler
+      Role: !GetAtt SetBatchTagsFunctionRole.Arn
+      Environment:
+        Variables:
+          TEAM_TO_ROLE_ARN_MAP_PARAM_NAME: !Ref TeamToRoleArnMapParamName
+
+  SetBatchTagsFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - !Ref BatchTagPolicy
+        - !Ref SsmManagedPolicy
+
+  BatchTagPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: GetAndPutBatchTags
+            Effect: 'Allow'
+            Action:
+              - 'batch:ListTagsForResource'
+              - 'batch:TagResource'
+              - 'batch:UntagResource'
+            Resource: '*'
+
   SetBucketTagsFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -128,6 +169,14 @@ Resources:
               - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${TeamToRoleArnMapParamName}'
 
 Outputs:
+  SetBatchTagsFunctionName:
+    Value: !Ref SetBatchTagsFunction
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-SetBatchTagsFunctionName'
+  SetBatchTagsFunctionArn:
+    Value: !GetAtt SetBatchTagsFunction.Arn
+    Export:
+      Name: !Sub '${AWS::Region}-${AWS::StackName}-SetBatchTagsFunctionArn'
   SetBucketTagsFunctionName:
     Value: !Ref SetBucketTagsFunction
     Export:
