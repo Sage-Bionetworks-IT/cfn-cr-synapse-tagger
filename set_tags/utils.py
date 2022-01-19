@@ -79,9 +79,8 @@ def get_synapse_owner_id(tags):
         principal_arn_value = tag.get('Value')
         synapse_owner_id = principal_arn_value.split('/')[-1]
   if isinstance(tags, dict):  # tags:{'string':'string'}
-    for key, value in tags.items():
-      if (key == principal_arn_tag):
-        principal_arn_value = value
+    if principal_arn_tag in tags:
+        principal_arn_value = tags.get(principal_arn_tag)
         synapse_owner_id = principal_arn_value.split('/')[-1]
 
   if synapse_owner_id is None:
