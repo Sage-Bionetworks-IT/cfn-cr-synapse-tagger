@@ -54,16 +54,20 @@ def create_or_update(event, context):
   stack_tags = utils.get_cfn_stack_tags(stack_id)
   synapse_owner_id = utils.get_synapse_owner_id(stack_tags)
 
-  synapse_tags = utils.get_synapse_tags(synapse_owner_id)
+  # get synapse tags and format it into dict key/pair
+  synapse_tags_kv = utils.get_synapse_tags(synapse_owner_id)
+  synapse_tags_kp = utils.format_tags_kv_kp(synapse_tags_kv)
+
+  # get passed in batch resource ARNs
   batch_resources = utils.get_property_value(event, "BatchResources")
   if not batch_resources:
     raise Exception(f'No batch resources passed in, received: {batch_resources}')
 
+  # apply tags to each batch resource
   for key, value in batch_resources.items():
     resource_arn = value
     log.debug(f'Apply tags: {synapse_tags} to resource {resource_arn}')
-    batch_formatted_tags = utils.format_tags_kv_kp(synapse_tags)
-    apply_tags(resource_arn, batch_formatted_tags)
+    apply_tags(resource_arn, synapse_tags_kp)
 
 @helper.delete
 def delete(event, context):
