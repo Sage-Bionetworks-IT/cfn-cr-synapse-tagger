@@ -92,7 +92,6 @@ Create a custom resource in your cloudformation template. Here's an example:
     Properties:
       ServiceToken: !ImportValue
         'Fn::Sub': '${AWS::Region}-cfn-cr-synapse-tagger-SetBatchTagsFunctionArn'
-      StackId: !Ref AWS::StackId
       BatchResources:
         JobDefinitionArn: !Ref JobDefinition
         JobQueueArn: !Ref JobQueue

@@ -32,5 +32,3 @@ class TestSetBatchTagsHandler(unittest.TestCase):
           }})
       utils.get_batch_client = MagicMock(return_value=batch)
       result = set_batch_tags.apply_tags(self.STACK_ID, self.TEST_TAGS)
-
-
