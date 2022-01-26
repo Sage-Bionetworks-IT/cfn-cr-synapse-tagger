@@ -57,6 +57,7 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - !Ref BatchTagPolicy
         - !Ref SsmManagedPolicy
+        - !Ref CloudformationAccessPolicy
 
   BatchTagPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -167,6 +168,20 @@ Resources:
             Effect: Allow
             Resource:
               - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${TeamToRoleArnMapParamName}'
+
+  CloudformationAccessPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: GetAndPutBatchTags
+            Effect: 'Allow'
+            Action:
+              - 'cloudformation:Describe*'
+              - 'cloudformation:Get*'
+              - 'cloudformation:List*'
+            Resource: '*'
 
 Outputs:
   SetBatchTagsFunctionName:
