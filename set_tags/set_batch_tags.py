@@ -60,13 +60,14 @@ def create_or_update(event, context):
 
   # get passed in batch resource ARNs
   batch_resources = utils.get_property_value(event, "BatchResources")
+  log.debug(f'batch_resources from template: {batch_resources}')
   if not batch_resources:
     raise Exception(f'No batch resources passed in, received: {batch_resources}')
 
   # apply tags to each batch resource
   for key, value in batch_resources.items():
     resource_arn = value
-    log.debug(f'Apply tags: {synapse_tags} to resource {resource_arn}')
+    log.debug(f'Apply tags: {synapse_tags_kp} to resource {resource_arn}')
     apply_tags(resource_arn, synapse_tags_kp)
 
 @helper.delete
