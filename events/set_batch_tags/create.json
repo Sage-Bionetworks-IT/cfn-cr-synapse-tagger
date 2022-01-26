@@ -1,0 +1,18 @@
+{
+    "RequestType": "Create",
+    "ServiceToken": "arn:aws:lambda:us-east-1:465877038949:function:cfn-cr-synapse-tagger-SetBatchTagsFunction-jnC4JEpaEB3y",
+    "ResponseURL": "https://cloudformation-custom-resource-response-useast1.s3.amazonaws.com/arn%3Aaws%3Acloudformation%3Aus-east-1%3A465877038949%3Astack/SC-465877038949-pp-ejp7x6ajj3hfc/e76a0640-7ed2-11ec-8e00-1251d36122e9%7CBatchTagger%7C4c3ec5ea-250e-4603-9258-5a17cb283b36?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220126T180943Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIA6L7Q4OWT5Q62VZN2%2F20220126%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=b27bb807acdd35ae275132401da6122de0dddd288371cc65ac3e72dbe949dfa7",
+    "StackId": "arn:aws:cloudformation:us-east-1:465877038949:stack/SC-465877038949-pp-ejp7x6ajj3hfc/e76a0640-7ed2-11ec-8e00-1251d36122e9",
+    "RequestId": "4c3ec5ea-250e-4603-9258-5a17cb283b36",
+    "LogicalResourceId": "BatchTagger",
+    "ResourceType": "Custom::SynapseTagger",
+    "ResourceProperties": {
+        "ServiceToken": "arn:aws:lambda:us-east-1:465877038949:function:cfn-cr-synapse-tagger-SetBatchTagsFunction-jnC4JEpaEB3y",
+        "BatchResources": {
+            "JobDefinitionArn": "arn:aws:batch:us-east-1:465877038949:job-definition/SC-465877038949-pp-ejp7x6ajj3hfc:1",
+            "ComputeEnvironmentArn": "arn:aws:batch:us-east-1:465877038949:compute-environment/ComputeEnvironment-f9ed51ec689ce52",
+            "SchedulingPolicyArn": "arn:aws:batch:us-east-1:465877038949:scheduling-policy/SchedulingPolicy-rcfyL85a5z3I6NzG",
+            "JobQueueArn": "arn:aws:batch:us-east-1:465877038949:job-queue/JobQueue-9031ee8c30e9f57"
+        }
+    }
+}

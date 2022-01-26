@@ -1,0 +1,19 @@
+{
+  "RequestType": "Delete",
+  "ServiceToken": "arn:aws:lambda:us-east-1:465877038949:function:cfn-cr-synapse-tagger-SetBatchTagsFunction-jnC4JEpaEB3y",
+  "ResponseURL": "https://cloudformation-custom-resource-response-useast1.s3.amazonaws.com/arn%3Aaws%3Acloudformation%3Aus-east-1%3A465877038949%3Astack/SC-465877038949-pp-ejp7x6ajj3hfc/e76a0640-7ed2-11ec-8e00-1251d36122e9%7CBatchTagger%7C9459655b-a551-4ced-b161-b1a0d06dcb13?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220126T182109Z&X-Amz-SignedHeaders=host&X-Amz-Expires=7200&X-Amz-Credential=AKIA6L7Q4OWT5Q62VZN2%2F20220126%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=c1afe300084c0bce84ff5e843721790d61c31726e2245b3c58f266855d227599",
+  "StackId": "arn:aws:cloudformation:us-east-1:465877038949:stack/SC-465877038949-pp-ejp7x6ajj3hfc/e76a0640-7ed2-11ec-8e00-1251d36122e9",
+  "RequestId": "9459655b-a551-4ced-b161-b1a0d06dcb13",
+  "LogicalResourceId": "BatchTagger",
+  "PhysicalResourceId": "SC-465877038949-pp-ejp7x6ajj3hfc_BatchTagger_8EL0U3H7",
+  "ResourceType": "Custom::SynapseTagger",
+  "ResourceProperties": {
+    "ServiceToken": "arn:aws:lambda:us-east-1:465877038949:function:cfn-cr-synapse-tagger-SetBatchTagsFunction-jnC4JEpaEB3y",
+    "BatchResources": {
+      "JobDefinitionArn": "arn:aws:batch:us-east-1:465877038949:job-definition/SC-465877038949-pp-ejp7x6ajj3hfc:2",
+      "ComputeEnvironmentArn": "arn:aws:batch:us-east-1:465877038949:compute-environment/ComputeEnvironment-f9ed51ec689ce52",
+      "SchedulingPolicyArn": "arn:aws:batch:us-east-1:465877038949:scheduling-policy/SchedulingPolicy-rcfyL85a5z3I6NzG",
+      "JobQueueArn": "arn:aws:batch:us-east-1:465877038949:job-queue/JobQueue-9031ee8c30e9f57"
+    }
+  }
+}
