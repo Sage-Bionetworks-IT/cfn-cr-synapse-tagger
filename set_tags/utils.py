@@ -34,6 +34,67 @@ def get_iam_client():
 def get_synapse_client():
   return synapseclient.Synapse()
 
+def get_cfn_client():
+  return boto3.client('cloudformation')
+
+def get_stack_id(event):
+  '''Get the stack id from the event
+
+  evemt: the service catalog event
+  returns: the stack id
+  '''
+  stack_id = event.get('StackId')
+  if not stack_id:
+    raise AssertionError(f'StackId property not in service catalog event')
+
+  return stack_id
+
+def get_property_value(event, property):
+  '''Get the resource properties from event params sent to lambda
+
+  evemt: the service catalog event
+  property: the passed in property from the service catalog template
+  returns: the value for the property
+  '''
+  resource_properties = event.get('ResourceProperties')
+  property_value = resource_properties.get(property)
+  if not property_value:
+    raise ValueError(f'Template property {property} not found')
+
+  return property_value
+
+def format_tags_kv_kp(tags):
+  '''Format tags from a list of Key/Value pairs to a dict of key pairs
+
+  tags: A list of dictionary of key/value pairs
+      i.e. tags:[{'Key':'string', 'Value':'string'}]
+  returns:  A dictionary of key pairs
+      i.e. tags:{'string':'string'}
+  '''
+  kp = {}
+  for tag in tags:
+    kp[tag['Key']] = tag['Value']
+
+  return kp
+
+def get_cfn_stack_tags(stack_id):
+  '''Look up tags from a cloudformation stack
+
+  returns: A list of dictionary of key/value pairs
+      i.e. tags:[{'Key':'string', 'Value':'string'}]
+  '''
+  client = get_cfn_client()
+  response = client.describe_stacks(
+    StackName=stack_id
+  )
+  log.debug(f'cloudformation describe_stacks response: {response}')
+  stack = response.get('Stacks')[0]
+  tags = stack.get('Tags')
+  if not tags or len(tags) == 0:
+    raise Exception(f'No tags returned, received: {response}')
+
+  return tags
+
 def get_env_var_value(env_var):
   '''Get the value of an environment variable
   :param env_var: the environment variable
@@ -87,8 +148,6 @@ def get_synapse_owner_id(tags):
       raise ValueError(f'{principal_arn_tag} not found in tags: {tags}')
 
   return synapse_owner_id
-
-
 
 def get_synapse_user_profile(synapse_id):
   '''Get synapse user profile data'''
