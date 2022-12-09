@@ -9,7 +9,6 @@ pytest = "~=6.0"
 pytest-mock = "~=3.3"
 boto3 = "~=1.17"
 pre-commit = "~=2.20"
-aws-sam-cli = "~=1.66"
 
 [packages]
 crhelper = "~=2.0"
