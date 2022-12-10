@@ -1,2 +1,2 @@
-crhelper~=2.0.6
-synapseclient~=2.2.0
+crhelper~=2.0
+synapseclient~=2.7
