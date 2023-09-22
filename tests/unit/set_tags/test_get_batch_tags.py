@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import boto3
 import botocore
@@ -11,6 +11,7 @@ from set_tags import utils
 
 class TestGetBatchTags(unittest.TestCase):
 
+  @patch.dict('os.environ', {'AWS_DEFAULT_REGION': 'test-region'})
   def test_valid_instance(self):
     batch = utils.get_batch_client()
     with Stubber(batch) as stubber:
@@ -29,6 +30,7 @@ class TestGetBatchTags(unittest.TestCase):
       self.assertEqual(tags, result)
 
 
+  @patch.dict('os.environ', {'AWS_DEFAULT_REGION': 'test-region'})
   def test_invalid_instance(self):
     batch = utils.get_batch_client()
     with Stubber(batch) as stubber, self.assertRaises(botocore.exceptions.ClientError):
@@ -42,6 +44,7 @@ class TestGetBatchTags(unittest.TestCase):
       result = set_batch_tags.get_batch_tags(invalid_resource_id)
 
 
+  @patch.dict('os.environ', {'AWS_DEFAULT_REGION': 'test-region'})
   def test_no_tags(self):
     batch = utils.get_batch_client()
     with Stubber(batch) as stubber, self.assertRaises(Exception):

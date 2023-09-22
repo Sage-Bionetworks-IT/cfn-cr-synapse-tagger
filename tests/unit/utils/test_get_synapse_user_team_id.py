@@ -15,6 +15,7 @@ def get_membership_status_is_not_member(synapse_id, team_id):
 
 class TestGetSynapseUserTeamId(unittest.TestCase):
 
+  @patch.dict('os.environ', {'AWS_DEFAULT_REGION': 'test-region'})
   def test_is_team_member(self):
     ssm = boto3.client('ssm')
     with Stubber(ssm) as stubber, \
@@ -27,6 +28,7 @@ class TestGetSynapseUserTeamId(unittest.TestCase):
         self.assertEqual(result, expected)
 
 
+  @patch.dict('os.environ', {'AWS_DEFAULT_REGION': 'test-region'})
   def test_is_not_team_member(self):
     ssm = boto3.client('ssm')
     with Stubber(ssm) as stubber, \

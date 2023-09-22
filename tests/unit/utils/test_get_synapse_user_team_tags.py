@@ -7,6 +7,7 @@ from botocore.stub import Stubber
 
 class TestGetSynapseUserTeamTags(unittest.TestCase):
 
+  @patch.dict('os.environ', {'AWS_DEFAULT_REGION': 'test-region'})
   def test_user_in_a_team(self):
     ssm = boto3.client('ssm')
     with Stubber(ssm) as stubber, \
@@ -16,6 +17,7 @@ class TestGetSynapseUserTeamTags(unittest.TestCase):
         expected = [{'Key': 'synapse:teamId', 'Value': '1111111'}]
         self.assertListEqual(result, expected)
 
+  @patch.dict('os.environ', {'AWS_DEFAULT_REGION': 'test-region'})
   def test_user_not_in_a_team(self):
     ssm = boto3.client('ssm')
     with Stubber(ssm) as stubber, \

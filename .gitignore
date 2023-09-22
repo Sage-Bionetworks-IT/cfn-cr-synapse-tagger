@@ -139,3 +139,6 @@ temp/
 
 # aws sam
 .aws-sam/
+
+# generated dynamically from Pipfile
+requirements.txt

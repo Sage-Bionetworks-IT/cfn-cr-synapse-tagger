@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from botocore.stub import Stubber
 
@@ -15,6 +15,7 @@ class TestSetInstanceTagsHandler(unittest.TestCase):
     'Value': 'bar'
   }]
 
+  @patch.dict('os.environ', {'AWS_DEFAULT_REGION': 'test-region'})
   def test_happy_path(self):
     ec2 = utils.get_ec2_client()
     with Stubber(ec2) as stubber:
