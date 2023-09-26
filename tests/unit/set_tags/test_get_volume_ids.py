@@ -1,7 +1,7 @@
 import unittest
 import boto3
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from set_tags import utils
 from botocore.stub import Stubber
 
@@ -10,6 +10,7 @@ from set_tags import set_instance_tags
 
 class TestGetVolumeIds(unittest.TestCase):
 
+  @patch.dict('os.environ', {'AWS_DEFAULT_REGION': 'test-region'})
   def test_happy(self):
     ec2 = boto3.client('ec2')
     with Stubber(ec2) as stubber:

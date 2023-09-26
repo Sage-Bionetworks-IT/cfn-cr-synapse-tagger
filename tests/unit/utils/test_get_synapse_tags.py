@@ -18,6 +18,7 @@ MOCK_TEAM_TAGS = [
 
 class TestGetSynapseTags(unittest.TestCase):
 
+  @patch.dict('os.environ', {'AWS_DEFAULT_REGION': 'test-region'})
   def test_happy_path(self):
     ssm = boto3.client('ssm')
     with Stubber(ssm) as stubber, \

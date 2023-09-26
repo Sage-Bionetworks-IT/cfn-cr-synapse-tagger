@@ -20,6 +20,7 @@ MOCK_GET_PARAMETER_RESPONSE = {
 
 class TestGetSynapseTeamIds(unittest.TestCase):
 
+  @patch.dict('os.environ', {'AWS_DEFAULT_REGION': 'test-region'})
   def test_happy_path(self):
     ssm = boto3.client('ssm')
     with Stubber(ssm) as stubber, \
@@ -31,6 +32,7 @@ class TestGetSynapseTeamIds(unittest.TestCase):
         expected = ["1111111","2222222"]
         self.assertListEqual(result, expected)
 
+  @patch.dict('os.environ', {'AWS_DEFAULT_REGION': 'test-region'})
   def test_no_env_var_team_to_role_arn_map_param_name(self):
     ssm = boto3.client('ssm')
     with Stubber(ssm) as stubber, \
@@ -40,6 +42,7 @@ class TestGetSynapseTeamIds(unittest.TestCase):
         expected = []
         self.assertListEqual(result, expected)
 
+  @patch.dict('os.environ', {'AWS_DEFAULT_REGION': 'test-region'})
   def test_no_ssm_param_role_arn_map(self):
     ssm = boto3.client('ssm')
     with Stubber(ssm) as stubber, \

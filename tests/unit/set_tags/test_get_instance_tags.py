@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import boto3
 import botocore
@@ -11,6 +11,7 @@ from set_tags import utils
 
 class TestGetInstanceTags(unittest.TestCase):
 
+  @patch.dict('os.environ', {'AWS_DEFAULT_REGION': 'test-region'})
   def test_valid_instance(self):
     ec2 = utils.get_ec2_client()
     with Stubber(ec2) as stubber:
@@ -29,6 +30,7 @@ class TestGetInstanceTags(unittest.TestCase):
       self.assertEqual(tags, result)
 
 
+  @patch.dict('os.environ', {'AWS_DEFAULT_REGION': 'test-region'})
   def test_invalid_instance(self):
     ec2 = utils.get_ec2_client()
     with Stubber(ec2) as stubber, self.assertRaises(botocore.exceptions.ClientError):
@@ -42,6 +44,7 @@ class TestGetInstanceTags(unittest.TestCase):
       result = set_instance_tags.get_instance_tags(invalid_instance_id)
 
 
+  @patch.dict('os.environ', {'AWS_DEFAULT_REGION': 'test-region'})
   def test_no_tags(self):
     ec2 = boto3.client('ec2')
     with Stubber(ec2) as stubber, self.assertRaises(Exception):

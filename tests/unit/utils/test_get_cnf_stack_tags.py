@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import boto3
 import botocore
@@ -10,6 +10,7 @@ from set_tags import utils
 
 class TestGetCfnStackTags(unittest.TestCase):
 
+  @patch.dict('os.environ', {'AWS_DEFAULT_REGION': 'test-region'})
   def test_valid_stack(self):
     cfn = utils.get_cfn_client()
     with Stubber(cfn) as stubber:
@@ -68,6 +69,7 @@ class TestGetCfnStackTags(unittest.TestCase):
       result = utils.get_cfn_stack_tags(valid_stack_id)
       self.assertEqual(tags, result)
 
+  @patch.dict('os.environ', {'AWS_DEFAULT_REGION': 'test-region'})
   def test_no_tags(self):
     cfn = utils.get_cfn_client()
     with Stubber(cfn) as stubber, self.assertRaises(Exception):
