@@ -2,24 +2,14 @@ import unittest
 
 from set_tags import utils
 
+class TestMergeTags(unittest.TestCase):
 
-class TestFormatTags(unittest.TestCase):
-
-  def test_format_tags_none(self):
+  def test_happy_case(self):
     tags = []
-    result = utils.format_tags_kv_kp(tags)
-    self.assertEqual(result, {})
+    result = utils.merge_tags([{'Key':'foo','Value':'bar'}],[{'Key':'foo2','Value':'bar2'}])
+    self.assertEqual(result, [{'Key':'foo','Value':'bar'},{'Key':'foo2','Value':'bar2'}])
 
-  def test_format_tags_multiple(self):
-    tags = [
-      {'Key': 'heresatag', 'Value': 'heresatagvalue'},
-      {'Key': 'theresatag', 'Value': 'theresatagvalue'},
-      {'Key': 'aws:servicecatalog:provisioningPrincipalArn', 'Value': 'foo/bar'}
-    ]
-    result = utils.format_tags_kv_kp(tags)
-    expected = {
-      "heresatag": "heresatagvalue",
-      "theresatag": "theresatagvalue",
-      "aws:servicecatalog:provisioningPrincipalArn": "foo/bar"
-    }
-    self.assertEqual(result, expected)
+  def test_collision(self):
+    tags = []
+    result = utils.merge_tags([{'Key':'foo','Value':'bar'}],[{'Key':'foo','Value':'bar2'}])
+    self.assertEqual(result, [{'Key':'foo','Value':'bar2'}])
