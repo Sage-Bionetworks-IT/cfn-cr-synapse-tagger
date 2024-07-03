@@ -2,6 +2,7 @@ import unittest
 
 from set_tags import utils
 
+
 class TestFormatTags(unittest.TestCase):
 
   def test_format_tags_none(self):
@@ -22,4 +23,3 @@ class TestFormatTags(unittest.TestCase):
       "aws:servicecatalog:provisioningPrincipalArn": "foo/bar"
     }
     self.assertEqual(result, expected)
- 
