@@ -49,7 +49,7 @@ def apply_tags(name, tags):
 @helper.create
 @helper.update
 def create_or_update(event, context):
-  '''Handles customm resource create and update events'''
+  '''Handles custom resource create and update events'''
   log.debug('Received event: ' + json.dumps(event, sort_keys=False))
   log.info('Start Lambda processing')
   bucket_name = get_bucket_name(event)
@@ -58,7 +58,11 @@ def create_or_update(event, context):
   synapse_tags = utils.get_synapse_tags(synapse_owner_id)
   # put_bucket_tagging is a replace operation.  need to give it all
   # tags otherwise it will remove existing tags not in the list
-  all_tags = list(bucket_tags + synapse_tags)
+  # 
+  # In case of duplication, Synapse tags should replace existing
+  # bucket tags.
+  all_tags = utils.merge_tags(bucket_tags, synapse_tags)
+  
   log.debug(f'Apply tags: {all_tags} to bucket {bucket_name}')
   apply_tags(bucket_name, all_tags)
 
