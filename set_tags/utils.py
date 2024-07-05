@@ -311,3 +311,13 @@ def get_access_approved_role_tag(tags):
       return access_approved_role_tag
   else:
     raise ValueError(f'Expected to find {PRINCIPAL_ARN_TAG_KEY} in {tags}')
+
+def merge_tags(list1, list2):
+  '''Merge two lists of tags, the second overriding the first on key collisions
+  '''
+  unique_tags = format_tags_kv_kp(list1)
+  unique_tags.update(format_tags_kv_kp(list2))
+  result=[]
+  for entry in unique_tags:
+      result.append({'Key':entry,'Value':unique_tags[entry]})
+  return result
