@@ -1,6 +1,6 @@
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.4.0
+    rev: v4.6.0
     hooks:
     -   id: end-of-file-fixer
         language_version: python3
@@ -9,18 +9,18 @@ repos:
     -   id: check-ast
         language_version: python3
 -   repo: https://github.com/adrienverge/yamllint
-    rev: v1.19.0
+    rev: v1.35.1
     hooks:
     -   id: yamllint
         language_version: python3
 -   repo: https://github.com/awslabs/cfn-python-lint
-    rev: v0.26.1
+    rev: v1.15.0
     hooks:
     -   id: cfn-python-lint
         language_version: python3
         files: templates/.*\.(json|yml|yaml)$
 -   repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.1.7
+    rev: v1.5.5
     hooks:
     -   id: remove-tabs
         language_version: python3
