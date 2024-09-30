@@ -14,7 +14,7 @@ repos:
     -   id: yamllint
         language_version: python3
 -   repo: https://github.com/awslabs/cfn-python-lint
-    rev: v1.15.0
+    rev: v1.15.2
     hooks:
     -   id: cfn-python-lint
         language_version: python3
