@@ -13,7 +13,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: 3.11
       - uses: pre-commit/action@v3.0.0
 
   pytest:
@@ -23,7 +23,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: 3.11
       - run: pip install -U pipenv
       - run: pipenv install --dev
       - run: pipenv run coverage run -m pytest tests/ -svv
