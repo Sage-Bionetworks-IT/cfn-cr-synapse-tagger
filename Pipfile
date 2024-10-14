@@ -15,4 +15,4 @@ crhelper = "~=2.0"
 synapseclient = "~=2.7"
 
 [requires]
-python_version = "3.8"
+python_version = "3.11"
