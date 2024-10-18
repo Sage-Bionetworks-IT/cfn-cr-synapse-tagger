@@ -27,7 +27,7 @@ Parameters:
 Globals:
   Function:
     Timeout: 180
-    Runtime: python3.8
+    Runtime: python3.11
     Handler: app.handler
 
 Resources:
