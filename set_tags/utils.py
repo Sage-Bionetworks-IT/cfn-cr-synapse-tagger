@@ -154,10 +154,10 @@ def get_synapse_owner_id(tags):
   # Case 2: dictionary of key-value pairs
   # tags = {'key1':'value1', 'key2':'value2'}
   elif isinstance(tags, dict):
-    if synapse_owner_id_tag in tags: # Look for synapse:ownerId first
+    if synapse_owner_id_tag in tags:  # Look for synapse:ownerId first
       synapse_owner_id = tags[synapse_owner_id_tag]
       return synapse_owner_id
-    elif principal_arn_tag in tags: # Fallback to aws:servicecatalog:provisioningPrincipalArn
+    elif principal_arn_tag in tags:  # Fallback to aws:servicecatalog:provisioningPrincipalArn
       principal_arn_value = tags[principal_arn_tag]
       synapse_owner_id = principal_arn_value.split('/')[-1]
       return synapse_owner_id
