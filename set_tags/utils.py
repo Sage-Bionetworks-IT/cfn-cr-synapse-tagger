@@ -121,33 +121,50 @@ def get_synapse_owner_id(tags):
     raise ValueError(f'Expected to find {principal_arn_tag} in {tags}')
 
 def get_synapse_owner_id(tags):
-  '''Find the value of the principal ARN among the resource tags. The principal
-  ARN tag is applied by AWS and it's value should be in the following format
-  'arn:aws:sts::111111111:assumed-role/ServiceCatalogEndusers/378505'
+  '''Find the synapse owner ID from a group of tags. Look for the id from
+    'synapse:ownerId' tag first, if not found then look for the
+    'aws:servicecatalog:provisioningPrincipalArn' tag (IT-4483).
+    The principal ARN tag is applied by AWS on an initial service catalog
+    product deployment, it's value is in the following format
+    'arn:aws:sts::111111111:assumed-role/ServiceCatalogEndusers/378505'
   :param tags: resource tags can take two forms
     * A list of dictionary of key/value pairs
-      i.e. tags:[{'Key':'string', 'Value':'string'}]
-    * A dictionary of key pairs
-      i.e. tags:{'string':'string'}
+      i.e. tags = [{'Key':'key1', 'Value':'value1'}, {'Key':'key2', 'Value':'value2'}]
+    * A dictionary of key value pairs
+      i.e. tags = {'key1':'value1', 'key2':'value2'}
   returns: the synapse user id (i.e. 378505)
   '''
+  synapse_owner_id_tag = 'synapse:ownerId'
   principal_arn_tag = 'aws:servicecatalog:provisioningPrincipalArn'
-  synapse_owner_id = None
 
-  if isinstance(tags, list):  # tags:[{'Key':'string', 'Value':'string'}]
-    for tag in tags:
-      if tag.get('Key') == principal_arn_tag:
-        principal_arn_value = tag.get('Value')
+  # Case 1: list of dicts with "Key"/"Value"
+  # tags = [{'Key':'key1', 'Value':'value1'}, {'Key':'key2', 'Value':'value2'}]
+  if isinstance(tags, list):
+    for item in tags:  # Look for synapse:ownerId first
+      if item.get("Key") == synapse_owner_id_tag:
+        synapse_owner_id = item.get('Value')
+        return synapse_owner_id
+    for item in tags:  # Fallback to aws:servicecatalog:provisioningPrincipalArn
+      if item.get("Key") == principal_arn_tag:
+        principal_arn_value = item.get('Value')
         synapse_owner_id = principal_arn_value.split('/')[-1]
-  if isinstance(tags, dict):  # tags:{'string':'string'}
-    if principal_arn_tag in tags:
-        principal_arn_value = tags.get(principal_arn_tag)
-        synapse_owner_id = principal_arn_value.split('/')[-1]
+        return synapse_owner_id
+    return None
 
-  if synapse_owner_id is None:
-      raise ValueError(f'{principal_arn_tag} not found in tags: {tags}')
+  # Case 2: dictionary of key-value pairs
+  # tags = {'key1':'value1', 'key2':'value2'}
+  elif isinstance(tags, dict):
+    if synapse_owner_id_tag in tags: # Look for synapse:ownerId first
+      synapse_owner_id = tags[synapse_owner_id_tag]
+      return synapse_owner_id
+    elif principal_arn_tag in tags: # Fallback to aws:servicecatalog:provisioningPrincipalArn
+      principal_arn_value = tags[principal_arn_tag]
+      synapse_owner_id = principal_arn_value.split('/')[-1]
+      return synapse_owner_id
+    return None
 
-  return synapse_owner_id
+  else:
+    raise TypeError("Input must be either a dict or a list of {'Key':..., 'Value':...} dicts.")
 
 def get_synapse_user_profile(synapse_id):
   '''Get synapse user profile data'''
