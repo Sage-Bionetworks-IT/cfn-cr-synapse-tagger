@@ -107,20 +107,6 @@ def get_env_var_value(env_var):
   return value
 
 def get_synapse_owner_id(tags):
-  '''Find the value of the principal ARN among the resource tags. The principal
-  ARN tag is applied by AWS and it's value should be in the following format
-  'arn:aws:sts::111111111:assumed-role/ServiceCatalogEndusers/1234567'
-  '''
-  principal_arn_tag = 'aws:servicecatalog:provisioningPrincipalArn'
-  for tag in tags:
-    if tag.get('Key') == principal_arn_tag:
-      principal_arn_value = tag.get('Value')
-      synapse_owner_id = principal_arn_value.split('/')[-1]
-      return synapse_owner_id
-  else:
-    raise ValueError(f'Expected to find {principal_arn_tag} in {tags}')
-
-def get_synapse_owner_id(tags):
   '''Find the synapse owner ID from a group of tags. Look for the id from
     'synapse:ownerId' tag first, if not found then look for the
     'aws:servicecatalog:provisioningPrincipalArn' tag (IT-4483).
