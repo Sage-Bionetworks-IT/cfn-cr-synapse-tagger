@@ -151,6 +151,47 @@ def update_bucket_principal_arn(bucket_name: str, target_user_id: str, new_assum
     except Exception as e:
         print(f"Error updating bucket policy: {e}")
 
+def get_batch_resource_arns(stack_name: str) -> dict:
+    """
+    Retrieves physical IDs of Batch resources from a CloudFormation stack.
+
+    Args:
+        stack_name (str): The name or ID of the CloudFormation stack.
+
+    Returns:
+        dict: Dictionary containing ARNs for:
+            - JobDefinitionArn
+            - ComputeEnvironmentArn
+            - SchedulingPolicyArn
+            - JobQueueArn
+    """
+    cf_client = boto3.client("cloudformation")
+    result = {}
+
+    try:
+        # Call describe_stack_resources API
+        response = cf_client.describe_stack_resources(StackName=stack_name)
+        stack_resources = response.get("StackResources", [])
+
+        for resource in stack_resources:
+            resource_type = resource.get("ResourceType")
+            physical_id = resource.get("PhysicalResourceId")
+
+            if resource_type == "AWS::Batch::JobDefinition":
+                result["JobDefinitionArn"] = physical_id
+            elif resource_type == "AWS::Batch::ComputeEnvironment":
+                result["ComputeEnvironmentArn"] = physical_id
+            elif resource_type == "AWS::Batch::SchedulingPolicy":
+                result["SchedulingPolicyArn"] = physical_id
+            elif resource_type == "AWS::Batch::JobQueue":
+                result["JobQueueArn"] = physical_id
+
+        return result
+
+    except cf_client.exceptions.ClientError as e:
+        print(f"Error retrieving stack resources: {e}")
+        return {}
+
 
 def main():
     args = get_args()
@@ -159,7 +200,8 @@ def main():
 
     # Execute a Service catalog change owner action
     sc_client = boto3.client("servicecatalog")
-    print(f"Executing Service Catalog change owner action for product {args.ProvisionedProductId} to new owner {new_owner_arn}")
+    print(f"Executing Service Catalog change owner action for product "
+          f"{args.ProvisionedProductId} to new owner {new_owner_arn}")
     response = sc_client.update_provisioned_product_properties(
         ProvisionedProductId=args.ProvisionedProductId,
         ProvisionedProductProperties={
@@ -171,47 +213,53 @@ def main():
     # Update tags for service catalog products
     os.environ["TEAM_TO_ROLE_ARN_MAP_PARAM_NAME"] = "/service-catalog/TeamToRoleArnMap"
     if args.StackId:
-        print(f"StackId: {args.StackId}")
-        event = {"StackId": args.StackId}
+        stack_id = args.StackId
+        print(f"StackId: {stack_id}")
+        event = {"StackId": stack_id}
+        stack_name = stack_id.split("stack/")[1].split("/")[0]
         try:
-            # monkey patch to always return the Synapse owner id from
-            # the user supplied OwnerArn
+            # monkey patch to return the Synapse owner id from the passed in OwnerArn
             utils.get_synapse_owner_id = lambda tags: new_user_id
 
+            # monkey patch to return a dict of batch resource ARNs from the list of cloudformation resources
+            batch_resources = get_batch_resource_arns(stack_name)
+            utils.get_property_value = lambda event, key: batch_resources
+
+            print(f"Update tags on batch resources: {batch_resources}")
             set_batch_tags.create_or_update(event, None)
             print("Batch tags updated successfully.")
         except Exception as e:
-            print(f"Failed to update batch: {e}")
+            print(f"Failed to update batch resources: {e}")
             sys.exit(1)
     if args.BucketName:
         bucket_name = args.BucketName
-        print(f"Update tags on bucket: {bucket_name}")
         event = {"ResourceProperties":{"BucketName": bucket_name}}
         try:
             # Get existing synapse user id
             bucket_tags = set_bucket_tags.get_bucket_tags(bucket_name)
             existing_user_id = utils.get_synapse_owner_id(bucket_tags)
 
-            # monkey patch to always return the Synapse owner id from
-            # the user supplied OwnerArn
+            # monkey patch to return the Synapse owner id from the passed in OwnerArn
             utils.get_synapse_owner_id = lambda tags: new_user_id
 
+            print(f"Update tags on bucket: {bucket_name}")
             set_bucket_tags.create_or_update(event, None)
             print("Bucket tags updated successfully.")
 
             # Update the bucket policy to allow new owner access
+            print(f"Update policy on bucket: {bucket_name}")
             update_bucket_principal_arn(bucket_name, existing_user_id, new_owner_arn)
         except Exception as e:
             print(f"Failed to update bucket: {e}")
             sys.exit(1)
     if args.InstanceId:
-        print(f"InstanceId: {args.InstanceId}")
-        event = {"ResourceProperties":{"InstanceId": args.InstanceId}}
+        instance_id = args.InstanceId
+        event = {"ResourceProperties":{"InstanceId": instance_id}}
         try:
-            # monkey patch to always return the Synapse owner id from
-            # the user supplied OwnerArn
+            # monkey patch to return the Synapse owner id from the passed in OwnerArn
             utils.get_synapse_owner_id = lambda tags: new_user_id
 
+            print(f"Update tags on EC2 instance: {instance_id}")
             set_instance_tags.create_or_update(event, None)
             print("Instance tags updated successfully.")
         except Exception as e:
