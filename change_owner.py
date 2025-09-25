@@ -50,7 +50,7 @@ def get_args():
     parser.add_argument(
         "--NewOwnerArn",
         help="The ARN of the new owner (required)",
-        required = True
+        required=True
     )
 
     # Optional arguments
