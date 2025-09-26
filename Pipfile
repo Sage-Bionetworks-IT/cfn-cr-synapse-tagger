@@ -16,3 +16,6 @@ synapseclient = "~=2.7"
 
 [requires]
 python_version = "3.11"
+
+[scripts]
+change_owner = "python change_owner.py"
