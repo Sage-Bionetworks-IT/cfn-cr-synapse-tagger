@@ -11,18 +11,18 @@ repos:
     -   id: check-ast
         language_version: python3
 -   repo: https://github.com/adrienverge/yamllint
-    rev: v1.37.1
+    rev: v1.38.0
     hooks:
     -   id: yamllint
         language_version: python3
 -   repo: https://github.com/awslabs/cfn-python-lint
-    rev: v1.43.1
+    rev: v1.43.4
     hooks:
     -   id: cfn-python-lint
         language_version: python3
         files: templates/.*\.(json|yml|yaml)$
 -   repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.5.5
+    rev: v1.5.6
     hooks:
     -   id: remove-tabs
         language_version: python3
