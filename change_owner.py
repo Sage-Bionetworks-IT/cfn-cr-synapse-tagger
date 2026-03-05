@@ -120,7 +120,12 @@ def update_bucket_principal_arn(bucket_name: str, target_user_id: str, new_assum
         updated = False
 
         for statement in policy.get("Statement", []):
-            aws_principals = statement.get("Principal", {}).get("AWS", [])
+            principal = statement.get("Principal")
+
+            if not principal or not isinstance(principal, dict) or "AWS" not in principal:
+                continue
+
+            aws_principals = principal.get("AWS", [])
 
             # Ensure we have a list for consistency
             if isinstance(aws_principals, str):
