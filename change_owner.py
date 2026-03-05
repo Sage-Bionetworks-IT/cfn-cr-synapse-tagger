@@ -24,6 +24,7 @@
 import argparse
 import json
 import boto3
+from botocore.exceptions import ClientError
 import os
 import re
 import sys
@@ -151,10 +152,14 @@ def update_bucket_principal_arn(bucket_name: str, target_user_id: str, new_assum
         s3.put_bucket_policy(Bucket=bucket_name, Policy=json.dumps(policy))
         print(f"Bucket policy updated successfully for {bucket_name}.")
 
-    except s3.exceptions.NoSuchBucketPolicy:
-        print(f"No policy found for bucket {bucket_name}.")
-    except Exception as e:
-        print(f"Error updating bucket policy: {e}")
+    except ClientError as e:
+        error_code = e.response["Error"]["Code"]
+        if error_code == "NoSuchBucket":
+            print(f"Bucket {bucket_name} does not exist.")
+        elif error_code == "NoSuchBucketPolicy":
+            print(f"No policy found for bucket {bucket_name}.")
+        else:
+            print(f"Error updating bucket policy: {error_code}")
 
 def get_batch_resource_arns(stack_name: str) -> dict:
     """
