@@ -158,8 +158,8 @@ def update_bucket_principal_arn(bucket_name: str, target_user_id: str, new_assum
             print(f"Bucket {bucket_name} does not exist.")
         elif error_code == "NoSuchBucketPolicy":
             print(f"No policy found for bucket {bucket_name}.")
-        else:
-            print(f"Error updating bucket policy: {error_code}")
+    except Exception as e:
+            print(f"Error updating bucket policy: {e}")
 
 def get_batch_resource_arns(stack_name: str) -> dict:
     """
