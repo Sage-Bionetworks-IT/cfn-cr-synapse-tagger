@@ -24,7 +24,6 @@
 import argparse
 import json
 import boto3
-from botocore.exceptions import ClientError
 import os
 import re
 import sys
@@ -118,41 +117,11 @@ def update_bucket_principal_arn(bucket_name: str, target_user_id: str, new_assum
         response = s3.get_bucket_policy(Bucket=bucket_name)
         policy = json.loads(response["Policy"])
 
-        updated = False
+        if update_bucket_policy(policy, target_user_id, new_assumed_role_arn):
+            s3.put_bucket_policy(Bucket=bucket_name, Policy=json.dumps(policy))
+            print(f"Bucket policy updated successfully for {bucket_name}.")
 
-        for statement in policy.get("Statement", []):
-            principal = statement.get("Principal")
-
-            if not principal or not isinstance(principal, dict) or "AWS" not in principal:
-                continue
-
-            aws_principals = principal.get("AWS", [])
-
-            # Ensure we have a list for consistency
-            if isinstance(aws_principals, str):
-                aws_principals = [aws_principals]
-
-            new_list = []
-            for arn in aws_principals:
-                # Replace only if ARN contains the target user_id
-                if f"/{target_user_id}" in arn:
-                    new_list.append(new_assumed_role_arn)
-                    updated = True
-                else:
-                    new_list.append(arn)
-
-            if new_list:
-                statement["Principal"]["AWS"] = new_list
-
-        if not updated:
-            print(f"No ARN found with user_id {target_user_id}.")
-            return
-
-        # Apply updated policy
-        s3.put_bucket_policy(Bucket=bucket_name, Policy=json.dumps(policy))
-        print(f"Bucket policy updated successfully for {bucket_name}.")
-
-    except ClientError as e:
+    except s3.exceptions.ClientError as e:
         error_code = e.response["Error"]["Code"]
         if error_code == "NoSuchBucket":
             print(f"Bucket {bucket_name} does not exist.")
@@ -160,6 +129,38 @@ def update_bucket_principal_arn(bucket_name: str, target_user_id: str, new_assum
             print(f"No policy found for bucket {bucket_name}.")
     except Exception as e:
             print(f"Error updating bucket policy: {e}")
+
+
+def update_bucket_policy(bucket_policy:dict, target_user_id: str, new_assumed_role_arn: str):
+    updated = False
+    for statement in bucket_policy.get("Statement", []):
+        principal = statement.get("Principal", {})
+        if not principal or not isinstance(principal, dict) or "AWS" not in principal:
+            continue
+        aws_principals = statement.get("Principal", {}).get("AWS", [])
+        if len(aws_principals) == 0:
+            continue
+
+        # Ensure we have a list for consistency
+        if isinstance(aws_principals, str):
+            aws_principals = [aws_principals]
+
+        new_list = []
+        for arn in aws_principals:
+            # Replace only if ARN contains the target user_id
+            if f"/{target_user_id}" in arn:
+                new_list.append(new_assumed_role_arn)
+                updated = True
+            else:
+                new_list.append(arn)
+
+        if new_list:
+            statement["Principal"]["AWS"] = new_list
+
+    if not updated:
+        print(f"No ARN found with user_id {target_user_id}.")
+    return updated
+
 
 def get_batch_resource_arns(stack_name: str) -> dict:
     """
