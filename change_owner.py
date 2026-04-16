@@ -127,8 +127,12 @@ def update_bucket_principal_arn(bucket_name: str, target_user_id: str, new_assum
             print(f"Bucket {bucket_name} does not exist.")
         elif error_code == "NoSuchBucketPolicy":
             print(f"No policy found for bucket {bucket_name}.")
+        else:
+            print(f"Unexpected ClientError: {e}")
+            raise
     except Exception as e:
-            print(f"Error updating bucket policy: {e}")
+        print(f"Error updating bucket policy: {e}")
+        raise
 
 
 def update_bucket_policy(bucket_policy:dict, target_user_id: str, new_assumed_role_arn: str):
@@ -137,7 +141,7 @@ def update_bucket_policy(bucket_policy:dict, target_user_id: str, new_assumed_ro
         principal = statement.get("Principal", {})
         if not principal or not isinstance(principal, dict) or "AWS" not in principal:
             continue
-        aws_principals = statement.get("Principal", {}).get("AWS", [])
+        aws_principals = principal.get("AWS", [])
         if len(aws_principals) == 0:
             continue
 
@@ -154,8 +158,13 @@ def update_bucket_policy(bucket_policy:dict, target_user_id: str, new_assumed_ro
             else:
                 new_list.append(arn)
 
-        if new_list:
-            statement["Principal"]["AWS"] = new_list
+        deduped_list = []
+        for arn in new_list:
+            if arn not in deduped_list:
+                deduped_list.append(arn)
+
+        if deduped_list:
+            statement["Principal"]["AWS"] = deduped_list
 
     if not updated:
         print(f"No ARN found with user_id {target_user_id}.")
