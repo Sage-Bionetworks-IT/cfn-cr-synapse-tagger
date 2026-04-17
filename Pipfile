@@ -14,6 +14,7 @@ coverage = "~=7.0"
 [packages]
 crhelper = "~=2.0"
 synapseclient = "~=4.12.0"
+
 [requires]
 python_version = "3.14"
 
