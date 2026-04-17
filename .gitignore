@@ -142,3 +142,5 @@ temp/
 
 # generated dynamically from Pipfile
 requirements.txt
+requirements-dev.txt
+
