@@ -4,19 +4,19 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-requests-mock = "~=1.12"
-pytest = "~=9.0"
-pytest-mock = "~=3.15"
+requests-mock = "~=1.10"
+pytest = "~=7.0"
+pytest-mock = "~=3.3"
 pytest-cov = "~=7.0"
-boto3 = "~=1.42"
+boto3 = "~=1.17"
 coverage = "~=7.0"
 
 [packages]
 crhelper = "~=2.0"
-synapseclient = "~=4.12.0"
+synapseclient = "~=4.11"
 
 [requires]
-python_version = "3.14"
+python_version = "3.11"
 
 [scripts]
 change_owner = "python change_owner.py"
