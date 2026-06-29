@@ -117,9 +117,12 @@ def update_bucket_principal_arn(bucket_name: str, target_user_id: str, new_assum
         response = s3.get_bucket_policy(Bucket=bucket_name)
         policy = json.loads(response["Policy"])
 
-        if update_bucket_policy(policy, target_user_id, new_assumed_role_arn):
+        if has_arn_with_user_id(policy, target_user_id):
+            update_bucket_policy(policy, target_user_id, new_assumed_role_arn)
             s3.put_bucket_policy(Bucket=bucket_name, Policy=json.dumps(policy))
             print(f"Bucket policy updated successfully for {bucket_name}.")
+        else:
+            print(f"No ARN found with user_id {target_user_id}.")
 
     except s3.exceptions.ClientError as e:
         error_code = e.response["Error"]["Code"]
@@ -135,8 +138,24 @@ def update_bucket_principal_arn(bucket_name: str, target_user_id: str, new_assum
         raise
 
 
-def update_bucket_policy(bucket_policy:dict, target_user_id: str, new_assumed_role_arn: str):
-    updated = False
+def has_arn_with_user_id(bucket_policy: dict, target_user_id: str) -> bool:
+    """Check if the bucket policy contains any ARN with the given user ID."""
+    for statement in bucket_policy.get("Statement", []):
+        principal = statement.get("Principal", {})
+        if not principal or not isinstance(principal, dict) or "AWS" not in principal:
+            continue
+        aws_principals = principal.get("AWS", [])
+        if isinstance(aws_principals, str):
+            aws_principals = [aws_principals]
+
+        for arn in aws_principals:
+            if f"/{target_user_id}" in arn:
+                return True
+    return False
+
+
+def update_bucket_policy(bucket_policy: dict, target_user_id: str, new_assumed_role_arn: str) -> None:
+    """Updates the Principal ARNs in a bucket policy to use a new assumed-role ARN."""
     for statement in bucket_policy.get("Statement", []):
         principal = statement.get("Principal", {})
         if not principal or not isinstance(principal, dict) or "AWS" not in principal:
@@ -154,7 +173,6 @@ def update_bucket_policy(bucket_policy:dict, target_user_id: str, new_assumed_ro
             # Replace only if ARN contains the target user_id
             if f"/{target_user_id}" in arn:
                 new_list.append(new_assumed_role_arn)
-                updated = True
             else:
                 new_list.append(arn)
 
@@ -165,10 +183,6 @@ def update_bucket_policy(bucket_policy:dict, target_user_id: str, new_assumed_ro
 
         if deduped_list:
             statement["Principal"]["AWS"] = deduped_list
-
-    if not updated:
-        print(f"No ARN found with user_id {target_user_id}.")
-    return updated
 
 
 def get_batch_resource_arns(stack_name: str) -> dict:
