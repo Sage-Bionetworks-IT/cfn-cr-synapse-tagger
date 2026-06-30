@@ -1,5 +1,5 @@
 import unittest
-from change_owner import update_bucket_policy
+from change_owner import update_bucket_policy, has_arn_with_user_id
 
 class TestUpdateBucketPolicy(unittest.TestCase):
 
@@ -18,13 +18,13 @@ class TestUpdateBucketPolicy(unittest.TestCase):
             ]
         }
 
-        updated = update_bucket_policy(
+        self.assertTrue(has_arn_with_user_id(policy, target_user_id="1234567"))
+        update_bucket_policy(
             bucket_policy=policy,
             target_user_id="1234567",
             new_assumed_role_arn="arn:aws:sts::111111111111:assumed-role/ServiceCatalogEndusers/7654321",
         )
 
-        self.assertTrue(updated)
         # The new ARN should only appear once, and the other role should remain
         self.assertEqual(
             policy["Statement"][0]["Principal"]["AWS"],
@@ -49,13 +49,13 @@ class TestUpdateBucketPolicy(unittest.TestCase):
             ]
         }
 
-        updated = update_bucket_policy(
+        self.assertTrue(has_arn_with_user_id(policy, target_user_id="1234567"))
+        update_bucket_policy(
             bucket_policy=policy,
             target_user_id="1234567",
             new_assumed_role_arn="arn:aws:sts::111111111111:assumed-role/ServiceCatalogEndusers/7654321",
         )
 
-        self.assertTrue(updated)
         self.assertEqual(
             policy["Statement"][0]["Principal"]["AWS"],
             [
@@ -79,13 +79,7 @@ class TestUpdateBucketPolicy(unittest.TestCase):
             ]
         }
 
-        updated = update_bucket_policy(
-            bucket_policy=policy,
-            target_user_id="1234567",
-            new_assumed_role_arn="arn:aws:sts::111111111111:assumed-role/ServiceCatalogEndusers/7654321",
-        )
-
-        self.assertFalse(updated)
+        self.assertFalse(has_arn_with_user_id(policy, target_user_id="1234567"))
         self.assertEqual(
             policy["Statement"][0]["Principal"]["AWS"],
             [
@@ -112,13 +106,13 @@ class TestUpdateBucketPolicy(unittest.TestCase):
             ]
         }
 
-        updated = update_bucket_policy(
+        self.assertTrue(has_arn_with_user_id(policy, target_user_id="1234567"))
+        update_bucket_policy(
             bucket_policy=policy,
             target_user_id="1234567",
             new_assumed_role_arn="arn:aws:sts::111111111111:assumed-role/ServiceCatalogEndusers/7654321",
         )
 
-        self.assertTrue(updated)
         self.assertEqual(
             policy["Statement"][0]["Principal"]["AWS"],
             [
@@ -142,13 +136,13 @@ class TestUpdateBucketPolicy(unittest.TestCase):
             ]
         }
 
-        updated = update_bucket_policy(
+        self.assertTrue(has_arn_with_user_id(policy, target_user_id="1234567"))
+        update_bucket_policy(
             bucket_policy=policy,
             target_user_id="1234567",
             new_assumed_role_arn="arn:aws:sts::111111111111:assumed-role/ServiceCatalogEndusers/7654321",
         )
 
-        self.assertTrue(updated)
         self.assertEqual(
             policy["Statement"][0]["Principal"]["AWS"],
             [
@@ -167,11 +161,5 @@ class TestUpdateBucketPolicy(unittest.TestCase):
             ]
         }
 
-        updated = update_bucket_policy(
-            bucket_policy=policy,
-            target_user_id="1234567",
-            new_assumed_role_arn="arn:aws:sts::111111111111:assumed-role/ServiceCatalogEndusers/7654321",
-        )
-
-        self.assertFalse(updated)
+        self.assertFalse(has_arn_with_user_id(policy, target_user_id="1234567"))
         self.assertEqual(policy["Statement"][0]["Principal"], "*")
